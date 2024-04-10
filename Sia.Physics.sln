@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sia.Physics", "Sia.Physics\Sia.Physics.csproj", "{638B3F99-26A2-471B-B225-716A1DB7B75A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sia.Math", "Sia.Math\Sia.Math.csproj", "{5C449A9B-3D29-4EC5-B073-4CE254A51815}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sia.Math.CodeGenerators", "Sia.Math.CodeGenerators\Sia.Math.CodeGenerators.csproj", "{EF999805-CA7E-4276-8D28-AFEFA957ABB1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{638B3F99-26A2-471B-B225-716A1DB7B75A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{638B3F99-26A2-471B-B225-716A1DB7B75A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{638B3F99-26A2-471B-B225-716A1DB7B75A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{638B3F99-26A2-471B-B225-716A1DB7B75A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF999805-CA7E-4276-8D28-AFEFA957ABB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF999805-CA7E-4276-8D28-AFEFA957ABB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF999805-CA7E-4276-8D28-AFEFA957ABB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF999805-CA7E-4276-8D28-AFEFA957ABB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C449A9B-3D29-4EC5-B073-4CE254A51815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C449A9B-3D29-4EC5-B073-4CE254A51815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C449A9B-3D29-4EC5-B073-4CE254A51815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C449A9B-3D29-4EC5-B073-4CE254A51815}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

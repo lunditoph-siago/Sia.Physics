@@ -12,7 +12,7 @@ public enum IndexerMode
 }
 
 public class BinaryOperatorWriter(VectorType type, (int Rows, int Columns) lhs, (int Rows, int Columns) rhs,
-    string op, string opDesc, string resultType, (int Rows, int Columns) result) : ITypeSourceWriter
+    string op, string opDesc, BaseType resultType, (int Rows, int Columns) result) : ITypeSourceWriter
 {
     public HashSet<string> Imports { get; } = ["System.Numerics", "System.Runtime.CompilerServices"];
 
@@ -71,6 +71,10 @@ public class IndexOperatorWriter(VectorType type, IndexerMode mode) : ITypeSourc
 
         var refPrefix = mode == IndexerMode.ByRef ? "ref " : "";
 
+        source.WriteLine("/// <summary>{0} at the specified index.</summary>", mode == IndexerMode.ByRef ? "Gets the reference of element": "Gets or Sets the element");
+        source.WriteLine("/// <param name=\"index\">The index of the element to {0}.</param>", mode == IndexerMode.ByRef ? "get" : "get or set");
+        source.WriteLine("/// <returns>The <see cref=\"{0}\" /> element at <paramref name=\"index\" />.</returns>", returnType);
+        source.WriteLine("/// <exception cref=\"ArgumentOutOfRangeException\"><paramref name=\"index\" /> was less than zero or greater than the number of elements.</exception>");
         source.WriteLine("public unsafe {1}{0} this[int index]", returnType, refPrefix);
         source.WriteLine("{");
         source.Indent++;
@@ -164,7 +168,7 @@ public class UnaryOperatorWriter(VectorType type, string op, string opDesc) : IT
         {
             for (var i = 0; i < resultCount; i++)
             {
-                if (op == "-" && type is { BaseType: "uint", Columns: 1 })
+                if (op == "-" && type is { BaseType: BaseType.UInt, Columns: 1 })
                     bodyStr.Append($"(uint){op}val.{fields[i]}");
                 else
                     bodyStr.Append($"{op}val.{fields[i]}");

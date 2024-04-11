@@ -8,31 +8,28 @@ namespace Sia.Math.CodeGenerators.Writer;
 
 public class VectorConstructorWriter(VectorType type, int numParameters, int[] parameterComponents) : ICompositeWriter
 {
-    private string TypeParams { get; } = GenerateTypeParams(type.BaseType, numParameters, parameterComponents);
+    private readonly string m_TypeParams = GenerateTypeParams(type.BaseType, numParameters, parameterComponents);
+    private readonly IEnumerable<string> m_Descriptions = GenerateDescriptions(type, numParameters, parameterComponents);
 
-    public HashSet<string> Imports { get; } = [];
+    public HashSet<string> Imports { get; } = ["System.Runtime.CompilerServices"];
 
     public HashSet<string> Inherits { get; } = [];
 
     public Action<IndentedTextWriter> TypeSourceWriter => source =>
     {
-        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        foreach (var description in m_Descriptions.Take(m_Descriptions.Count() - 1)) source.WriteLine(description);
 
-        using (Generator.GenerateInConstructor(source, type.TypeName, TypeParams))
+        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        using (Generator.GenerateInConstructor(source, type.TypeName, m_TypeParams))
         {
             var componentIndex = 0;
-            for (var i = 0; i < numParameters; i++)
+            foreach (var components in parameterComponents.Take(numParameters))
             {
-                var paramComponents = parameterComponents[i];
-                var componentString = string.Join("", VectorType.Components.Skip(componentIndex).Take(paramComponents));
-                for (var j = 0; j < paramComponents; j++)
+                var componentString = string.Concat(VectorType.Components.Skip(componentIndex).Take(components));
+                for (var j = 0; j < components; j++)
                 {
                     source.Write($"this.{VectorType.Components[componentIndex]} = {componentString}");
-                    if (paramComponents > 1)
-                    {
-                        source.Write(".");
-                        source.Write(VectorType.Components[j]);
-                    }
+                    if (components > 1) source.Write($".{VectorType.Components[j]}");
 
                     source.WriteLine(";");
                     componentIndex++;
@@ -49,7 +46,7 @@ public class VectorConstructorWriter(VectorType type, int numParameters, int[] p
             for (var i = 0; i < numParameters; i++)
             {
                 var paramComponents = parameterComponents[i];
-                var componentString = string.Join("", VectorType.Components.Skip(componentIndex).Take(paramComponents));
+                var componentString = string.Concat(VectorType.Components.Skip(componentIndex).Take(paramComponents));
 
                 if (i != 0) bodyBuilder.Append(", ");
                 bodyBuilder.Append(componentString);
@@ -57,84 +54,57 @@ public class VectorConstructorWriter(VectorType type, int numParameters, int[] p
             }
         }
 
+        foreach (var description in m_Descriptions) source.WriteLine(description);
+
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        source.WriteLine("public static {0} {0}({1}) => new {0}({2});", type.TypeName, TypeParams, bodyBuilder);
+        source.WriteLine("public static {0} {0}({1}) => new {0}({2});", type.TypeName, m_TypeParams, bodyBuilder);
     };
 
-    private static string GenerateTypeParams(string baseType, int numParameters, int[] parameterComponents)
+    private static IEnumerable<string> GenerateDescriptions(VectorType type, int numParameters, int[] parameterComponents)
     {
-        var paramsBuilder = new StringBuilder();
+        var typeCategory = type.Columns > 1 ? "matrix" : "vector";
+        var parameterParts = Enumerable.Range(0, numParameters)
+            .GroupBy(i => parameterComponents[i])
+            .Select(g => type.BaseType.ToTypeDescription(g.Key, 1, g.Count()))
+            .ToList();
 
-        var componentIndex = 0;
-        for (var i = 0; i < numParameters; i++)
+        var descriptions = new List<string>
         {
-            if (i != 0) paramsBuilder.Append(", ");
+            $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> {typeCategory} from {string.Join(", ", parameterParts.Take(parameterParts.Count - 1))} and {parameterParts.Last()}.</summary>"
+        };
 
-            var paramComponents = parameterComponents[i];
-            var paramType = baseType.ToTypeName(paramComponents, 1);
-            var componentString = string.Join("", VectorType.Components.Skip(componentIndex).Take(paramComponents));
+        descriptions.AddRange(parameterComponents.Take(numParameters)
+            .Select((components, i) =>
+            {
+                var componentString = string.Concat(VectorType.Components.Skip(parameterComponents.Take(i).Sum()).Take(components));
+                var componentPluralOrSingular = components > 1 ? "fields" : "field";
+                return $"/// <param name=\"{componentString}\">The value to assign to the <see cref=\"{componentString}\" /> {componentPluralOrSingular}.</param>";
+            }));
 
-            paramsBuilder.Append($"{paramType} {componentString}");
-            componentIndex += paramComponents;
-        }
+        descriptions.Add($"/// <returns>The <see cref=\"{type.TypeName}\" /> constructed from arguments.</returns>");
 
-        return paramsBuilder.ToString();
+        return descriptions;
+        
+    }
+
+    private static string GenerateTypeParams(BaseType baseType, int numParameters, int[] parameterComponents)
+    {
+        var componentIndex = 0;
+        return string.Join(", ", parameterComponents.Take(numParameters)
+            .Select(components =>
+            {
+                var paramType = baseType.ToTypeName(components, 1);
+                var componentString = string.Join("", VectorType.Components.Skip(componentIndex).Take(components));
+                componentIndex += components;
+                return $"{paramType} {componentString}";
+            }));
     }
 }
 
 public class MatrixColumnConstructorWriter(VectorType type) : ICompositeWriter
 {
-    private string TypeParams { get; } = GenerateTypeParams(type.BaseType.ToTypeName(type.Rows, 1), type.Columns);
-
-    public HashSet<string> Imports { get; } = [];
-
-    public HashSet<string> Inherits { get; } = [];
-
-    public Action<IndentedTextWriter> TypeSourceWriter => source =>
-    {
-        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        using (Generator.GenerateInConstructor(source, type.TypeName, TypeParams))
-        {
-            for (var column = 0; column < type.Columns; column++)
-                source.WriteLine("this.{0} = {0};", VectorType.MatrixFields[column]);
-        }
-    };
-
-    public Action<IndentedTextWriter> MathSourceWriter => source =>
-    {
-        var bodyBuilder = new StringBuilder();
-        {
-            for (var column = 0; column < type.Columns; column++)
-            {
-                if (column != 0) bodyBuilder.Append(", ");
-                bodyBuilder.Append(VectorType.MatrixFields[column]);
-            }
-        }
-
-        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        source.WriteLine("public static {0} {0}({1}) => new {0}({2});", type.TypeName, TypeParams, bodyBuilder);
-    };
-
-    private static string GenerateTypeParams(string columnType, int columns)
-    {
-        var paramsBuilder = new StringBuilder();
-
-        for (var column = 0; column < columns; column++)
-        {
-            if (column != 0) paramsBuilder.Append(", ");
-
-            paramsBuilder.Append(columnType);
-            paramsBuilder.Append(" ");
-            paramsBuilder.Append(VectorType.MatrixFields[column]);
-        }
-
-        return paramsBuilder.ToString();
-    }
-}
-
-public class MatrixRowConstructorWriter(VectorType type) : ICompositeWriter
-{
-    private string TypeParams { get; } = GenerateTypeParams(type.BaseType, type.Rows, type.Columns);
+    private readonly string m_TypeParams = GenerateTypeParams(type);
+    private readonly IEnumerable<string> m_Descriptions = GenerateDescriptions(type);
 
     public HashSet<string> Imports { get; } = ["System.Runtime.CompilerServices"];
 
@@ -142,59 +112,112 @@ public class MatrixRowConstructorWriter(VectorType type) : ICompositeWriter
 
     public Action<IndentedTextWriter> TypeSourceWriter => source =>
     {
+        foreach (var description in m_Descriptions.Take(m_Descriptions.Count() - 1)) source.WriteLine(description);
+
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        using (Generator.GenerateInConstructor(source, type.TypeName, TypeParams))
+        using (Generator.GenerateInConstructor(source, type.TypeName, m_TypeParams))
         {
-            for (var column = 0; column < type.Columns; column++)
+            foreach (var field in VectorType.MatrixFields.Take(type.Columns))
             {
-                source.Write($"this.{VectorType.MatrixFields[column]} = new {type.BaseType.ToTypeName(type.Rows, 1)}(");
-
-                for (var row = 0; row < type.Rows; row++)
-                {
-                    source.Write($"m{row}{column}");
-
-                    if (row != type.Rows - 1) source.Write(", ");
-                }
-
-                source.WriteLine(");");
+                source.WriteLine("this.{0} = {0};", field);
             }
         }
     };
 
     public Action<IndentedTextWriter> MathSourceWriter => source =>
     {
-        var bodyBuilder = new StringBuilder();
+        var bodyBuilder = string.Join(", ", VectorType.MatrixFields.Take(type.Columns));
+
+        foreach (var description in m_Descriptions) source.WriteLine(description);
+
+        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        source.WriteLine("public static {0} {0}({1}) => new {0}({2});", type.TypeName, m_TypeParams, bodyBuilder);
+    };
+
+    private static IEnumerable<string> GenerateDescriptions(VectorType type)
+    {
+        var descriptions = new List<string>
         {
-            for (var column = 0; column < type.Columns; column++)
+            $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> matrix from {type.BaseType.ToTypeDescription(type.Rows, 1, type.Columns)}.</summary>"
+        };
+
+        for (var col = 0; col < type.Columns; ++col)
+        {
+            descriptions.Add($"/// <param name=\"{VectorType.MatrixFields[col]}\">The value to assign to the <see cref=\"{VectorType.MatrixFields[col]}\" /> field.</param>");
+        }
+
+        descriptions.Add($"/// <returns>The <see cref=\"{type.TypeName}\" /> constructed from arguments.</returns>");
+
+        return descriptions;
+    }
+
+    private static string GenerateTypeParams(VectorType type)
+    {
+        return string.Join(", ", VectorType.MatrixFields.Take(type.Columns)
+            .Select(field => $"{type.BaseType.ToTypeName(type.Rows, 1)} {field}"));
+    }
+}
+
+public class MatrixRowConstructorWriter(VectorType type) : ICompositeWriter
+{
+    private readonly string m_TypeParams = GenerateTypeParams(type);
+    private readonly IEnumerable<string> m_Descriptions = GenerateDescriptions(type);
+
+    public HashSet<string> Imports { get; } = ["System.Runtime.CompilerServices"];
+
+    public HashSet<string> Inherits { get; } = [];
+
+    public Action<IndentedTextWriter> TypeSourceWriter => source =>
+    {
+        foreach (var description in m_Descriptions.Take(m_Descriptions.Count() - 1)) source.WriteLine(description);
+
+        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        using (Generator.GenerateInConstructor(source, type.TypeName, m_TypeParams))
+        {
+            var assignments = VectorType.MatrixFields.Take(type.Columns)
+                .Select((column, i) =>
+                    $"this.{column} = new {type.BaseType.ToTypeName(type.Rows, 1)}({
+                        string.Join(", ", Enumerable.Range(0, type.Rows).Select(row => $"m{row}{i}"))
+                    });");
+
+            foreach (var assignment in assignments) source.WriteLine(assignment);
+        }
+    };
+
+    public Action<IndentedTextWriter> MathSourceWriter => source =>
+    {
+        var bodyBuilder = string.Join(", ", Enumerable.Range(0, type.Columns)
+            .SelectMany(column => Enumerable.Range(0, type.Rows).Select(row => $"m{row}{column}")));
+
+        foreach (var description in m_Descriptions) source.WriteLine(description);
+
+        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        source.WriteLine("public static {0} {0}({1}) => new {0}({2});", type.TypeName, m_TypeParams, bodyBuilder);
+    };
+
+    private static IEnumerable<string> GenerateDescriptions(VectorType type)
+    {
+        var descriptions = new List<string>
+        {
+            $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> matrix from {type.Rows * type.Columns} <see cref=\"{type.BaseTypeName}\" /> values given in row-major order.</summary>"
+        };
+
+        for (var row = 0; row < type.Rows; ++row)
+        {
+            for (var col = 0; col < type.Columns; ++col)
             {
-                for (var row = 0; row < type.Rows; row++)
-                {
-                    if (row != 0 || column != 0) bodyBuilder.Append(", ");
-                    bodyBuilder.Append($"m{row}{column}");
-                }
+                descriptions.Add($"/// <param name=\"m{row}{col}\">The value to assign to the {(col + 1).FormatOrdinals()} element in the {(row + 1).FormatOrdinals()} row.</param>");
             }
         }
 
-        source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        source.WriteLine("public static {0} {0}({1}) => new {0}({2});", type.TypeName, TypeParams, bodyBuilder);
-    };
+        descriptions.Add($"/// <returns>The <see cref=\"{type.TypeName}\" /> constructed from arguments.</returns>");
 
-    private static string GenerateTypeParams(string baseType, int rows, int columns)
+        return descriptions;
+    }
+
+    private static string GenerateTypeParams(VectorType type)
     {
-        var paramsBuilder = new StringBuilder();
-
-        for (var row = 0; row < rows; row++)
-        {
-            if (row != 0) paramsBuilder.Append(", ");
-
-            var columnStr = new string[columns];
-
-            for (var column = 0; column < columns; column++)
-                columnStr[column] = $"{baseType} m{row}{column}";
-
-            paramsBuilder.Append(string.Join(", ", columnStr));
-        }
-
-        return paramsBuilder.ToString();
+        return string.Join(", ", Enumerable.Range(0, type.Rows * type.Columns)
+            .Select(i => $"{type.BaseTypeName} m{i / type.Columns}{i % type.Columns}"));
     }
 }

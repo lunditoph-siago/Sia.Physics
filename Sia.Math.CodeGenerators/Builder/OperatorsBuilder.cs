@@ -9,7 +9,7 @@ public class OperatorsBuilder(VectorType type) : IBuilder
     public ICompositeWriter Build()
     {
         var resultType = type.BaseType;
-        var resultBoolType = "bool";
+        var resultBoolType = BaseType.Bool;
 
         var isMatrix = type is { Rows: > 1, Columns: > 1 };
         m_OperatorsWriter.Add(new IndexOperatorWriter(type, isMatrix ? IndexerMode.ByRef : IndexerMode.ByValue));
@@ -57,7 +57,7 @@ public class OperatorsBuilder(VectorType type) : IBuilder
             m_OperatorsWriter.Add(new UnaryOperatorWriter(type, "~", "<inheritdoc cref=\"IBitwiseOperators{TSelf, TOther, TResult}.op_OnesComplement(TSelf)\" />"));
         }
 
-        if (type.BaseType == "bool")
+        if (type.BaseType is BaseType.Bool)
         {
             m_OperatorsWriter.Add(new UnaryOperatorWriter(type, "!", "<inheritdoc cref=\"IEqualityOperators{TSelf, TOther, TResult}.op_Inequality(TSelf, TOther)\" />"));
         }
@@ -72,7 +72,7 @@ public class OperatorsBuilder(VectorType type) : IBuilder
         return m_OperatorsWriter;
     }
 
-    private void GenerateBinaryOperator(int rows, int columns, string op, string opDesc, string resultType)
+    private void GenerateBinaryOperator(int rows, int columns, string op, string opDesc, BaseType resultType)
     {
         m_OperatorsWriter.Add(new BinaryOperatorWriter(type, (rows, columns), (rows, columns), op, opDesc, resultType, (rows, columns)));
         m_OperatorsWriter.Add(new BinaryOperatorWriter(type, (rows, columns), (1, 1), op, opDesc, resultType, (rows, columns)));

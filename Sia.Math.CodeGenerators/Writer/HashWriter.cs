@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sia.Math.CodeGenerators.Writer;
 
-public class GetHashCodeWriter : ITypeSourceWriter
+public class GetHashCodeWriter(VectorType type) : ITypeSourceWriter
 {
     public HashSet<string> Imports { get; } = ["System.Runtime.CompilerServices"];
 
@@ -13,8 +13,17 @@ public class GetHashCodeWriter : ITypeSourceWriter
 
     public Action<IndentedTextWriter> TypeSourceWriter => source =>
     {
+        source.WriteLine("/// <summary>Returns a hash code for the <see cref=\"{0}\" />.</summary>", type.TypeName);
+        source.WriteLine("/// <returns>The hash code.</returns>");
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        source.WriteLine("public override int GetHashCode() => (int)math.hash(this);");
+        source.WriteLine("public override int GetHashCode()");
+        source.WriteLine("{");
+        source.Indent++;
+        {
+            source.WriteLine("return (int)math.hash(this);");
+        }
+        source.Indent--;
+        source.WriteLine("}");
     };
 }
 
@@ -66,18 +75,14 @@ public class HashWriter(VectorType type, bool wide): IMathSourceWriter
 
     public Action<IndentedTextWriter> MathSourceWriter => source =>
     {
-        var returnType = wide ? "uint".ToTypeName(type.Rows, 1) : "uint";
+        var returnType = wide ? BaseType.UInt.ToTypeName(type.Rows, 1) : "uint";
         var functionName = wide ? "hashwide" : "hash";
         var matrixOrVector = type.Columns > 1 ? "matrix" : "vector";
         var matrixOrVectorUpper = char.ToUpper(matrixOrVector[0]) + matrixOrVector.Substring(1);
 
         if (wide)
         {
-            source.WriteLine("/// <summary>");
-            source.WriteLine("/// Returns a {0} vector hash code of a {1} {2}.", returnType, type.TypeName, matrixOrVector);
-            source.WriteLine("/// When multiple elements are to be hashes together, it can more efficient to calculate and combine wide hash");
-            source.WriteLine("/// that are only reduced to a narrow uint hash at the very end instead of at every step.");
-            source.WriteLine("/// </summary>");
+            source.WriteLine("/// <summary>Returns a {0} vector hash code of a {1} {2}.</summary>", returnType, type.TypeName, matrixOrVector);
         }
         else
         {
@@ -86,12 +91,13 @@ public class HashWriter(VectorType type, bool wide): IMathSourceWriter
         source.WriteLine("/// <param name=\"v\">{0} value to hash.</param>", matrixOrVectorUpper);
         source.WriteLine("/// <returns>{0} hash of the argument.</returns>", returnType);
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
-        source.WriteLine("public static {0} {1}({2} v) =>", returnType, functionName, type.TypeName);
+        source.WriteLine("public static {0} {1}({2} v)", returnType, functionName, type.TypeName);
+        source.WriteLine("{");
         source.Indent++;
         {
-            var align = $"{(wide ? "(" : "csum(")}";
+            var align = $"return {(wide ? "(" : "csum(")}";
             source.Write(align);
-            if (type.BaseType == "bool")
+            if (type.BaseType is BaseType.Bool)
             {
                 for (var column = 0; column < type.Columns; column++)
                 {
@@ -118,19 +124,11 @@ public class HashWriter(VectorType type, bool wide): IMathSourceWriter
                     }
 
                     var columnName = type.Columns > 1 ? "v.c" + column : "v";
-                    if (type.BaseType != "uint")
+                    if (type.BaseType is not BaseType.UInt)
                     {
                         columnName = type.BaseType switch
                         {
-                            "double" => $"fold_to_uint({columnName})",
-                            "half" => type.Rows switch
-                            {
-                                1 => "v.value",
-                                2 => "uint2(v.x.value, v.y.value)",
-                                3 => "uint3(v.x.value, v.y.value, v.z.value)",
-                                4 => "uint4(v.x.value, v.y.value, v.z.value, v.w.value)",
-                                _ => columnName
-                            },
+                            BaseType.Double => $"fold_to_uint({columnName})",
                             _ => $"asuint({columnName})"
                         };
                     }
@@ -142,6 +140,7 @@ public class HashWriter(VectorType type, bool wide): IMathSourceWriter
             }
         }
         source.Indent--;
+        source.WriteLine("}");
     };
 
     private static StringBuilder FormatPrimeUIntVector(int n)

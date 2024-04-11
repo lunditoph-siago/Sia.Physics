@@ -7,6 +7,7 @@ namespace Sia.Math.CodeGenerators.Writer;
 public interface IGlobalSourceWriter
 {
     HashSet<string> Imports { get; }
+
     HashSet<string> Inherits { get; }
 }
 
@@ -105,7 +106,7 @@ public class CompositeWriter : ICompositeWriter
             var sourceWriter = m_MathSourceWriters[i];
             if (sourceWriter.MathSourceWriter != null)
             {
-                if (i != 0 && i < m_TypeSourceWriters.Count)
+                if (i != 0 && i < m_MathSourceWriters.Count)
                 {
                     source.WriteLineNoTabs(string.Empty);
                 }

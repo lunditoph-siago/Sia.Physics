@@ -8,10 +8,9 @@ public class HashBuilder(VectorType type) : IBuilder
 
     public ICompositeWriter Build()
     {
-        m_HashWriter.Add(new GetHashCodeWriter());
+        m_HashWriter.Add(new GetHashCodeWriter(type));
 
         m_HashWriter.Add(new HashWriter(type, true));
-        m_HashWriter.Add(new MathDividerWriter());
         m_HashWriter.Add(new HashWriter(type, false));
 
         return m_HashWriter;

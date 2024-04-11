@@ -16,11 +16,11 @@ public partial class MathSourceGenerator : ISourceGenerator
         {
             for (var columns = 1; columns <= 4; columns++)
             {
-                AddTypeCode(ref context, "bool", rows, columns, Features.BitwiseLogic);
-                AddTypeCode(ref context, "int", rows, columns, Features.All);
-                AddTypeCode(ref context, "uint", rows, columns, Features.All);
-                AddTypeCode(ref context, "float", rows, columns, Features.Arithmetic | Features.UnaryNegation);
-                AddTypeCode(ref context, "double", rows, columns, Features.Arithmetic | Features.UnaryNegation);
+                AddTypeCode(ref context, BaseType.Bool, rows, columns, Features.BitwiseLogic);
+                AddTypeCode(ref context, BaseType.Int, rows, columns, Features.All);
+                AddTypeCode(ref context, BaseType.UInt, rows, columns, Features.All);
+                AddTypeCode(ref context, BaseType.Float, rows, columns, Features.Arithmetic | Features.UnaryNegation);
+                AddTypeCode(ref context, BaseType.Double, rows, columns, Features.Arithmetic | Features.UnaryNegation);
             }
         }
 

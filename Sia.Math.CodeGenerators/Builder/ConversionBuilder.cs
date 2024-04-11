@@ -12,45 +12,45 @@ public class ConversionBuilder(VectorType type): IBuilder
 
         switch (type.BaseType)
         {
-            case "int":
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "uint", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "uint", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "float", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "float", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "double", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "double", true, false));
+            case BaseType.Int:
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.UInt, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.UInt, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Float, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Float, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Double, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Double, true, false));
                 break;
-            case "uint":
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "int", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "int", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "float", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "float", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "double", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "double", true, false));
+            case BaseType.UInt:
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Int, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Int, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Float, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Float, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Double, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Double, true, false));
                 break;
-            case "float":
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "int", false, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "int", false, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "uint", false, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "uint", false, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "double", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "double", true, false));
+            case BaseType.Float:
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Int, false, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Int, false, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.UInt, false, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.UInt, false, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Double, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Double, true, false));
                 break;
-            case "double":
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "bool", true, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "int", false, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "int", false, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "uint", false, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "uint", false, false));
-                m_ConversionWriter.Add(new ConversionWriter(type, "float", false, true));
-                m_ConversionWriter.Add(new ConversionWriter(type, "float", false, false));
+            case BaseType.Double:
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Bool, true, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Int, false, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Int, false, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.UInt, false, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.UInt, false, false));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Float, false, true));
+                m_ConversionWriter.Add(new ConversionWriter(type, BaseType.Float, false, false));
                 break;
         }
 

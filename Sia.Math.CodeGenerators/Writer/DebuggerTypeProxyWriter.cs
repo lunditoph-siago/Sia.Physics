@@ -20,7 +20,7 @@ public class DebuggerTypeProxyWriter(VectorType type) : ITypeSourceWriter
         source.Indent++;
         {
             for (var i = 0; i < type.Rows; i++)
-                source.WriteLine($"public {type.BaseType} {VectorType.VectorFields[i]};");
+                source.WriteLine($"public {type.BaseTypeName} {VectorType.VectorFields[i]};");
 
             source.WriteLine($"public DebuggerProxy({type.TypeName} v)");
             source.WriteLine("{");

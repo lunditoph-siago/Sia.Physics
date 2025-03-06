@@ -1,7 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Sia.Math.CodeGenerators.Writer;
 
@@ -23,32 +23,13 @@ public class BinaryOperatorWriter(VectorType type, (int Rows, int Columns) lhs, 
         var fields = result.Columns > 1 ? VectorType.MatrixFields : VectorType.VectorFields;
         var resultCount = result.Columns > 1 ? result.Columns : result.Rows;
 
-        var bodyStr = new StringBuilder();
-        {
-            for (var i = 0; i < resultCount; i++)
+        var bodyStr = string.Join(", ", Enumerable.Range(0, resultCount)
+            .Select(i => (lhs.Rows, rhs.Rows) switch
             {
-                if (lhs.Rows == 1)
-                {
-                    var rhsIndex = i;
-                    bodyStr.Append($"lhs {op} rhs.{fields[rhsIndex]}");
-                    if (i != resultCount - 1) bodyStr.Append(", ");
-                }
-                else if (rhs.Rows == 1)
-                {
-                    var lhsIndex = i;
-                    bodyStr.Append($"lhs.{fields[lhsIndex]} {op} rhs");
-                    if (i != resultCount - 1) bodyStr.Append(", ");
-                }
-                else
-                {
-                    var lhsIndex = i;
-                    var rhsIndex = i;
-
-                    bodyStr.Append($"lhs.{fields[lhsIndex]} {op} rhs.{fields[rhsIndex]}");
-                    if (i != resultCount - 1) bodyStr.Append(", ");
-                }
-            }
-        }
+                (1, _) => $"lhs {op} rhs.{fields[i]}",
+                (_, 1) => $"lhs.{fields[i]} {op} rhs",
+                _ => $"lhs.{fields[i]} {op} rhs.{fields[i]}"
+            }));
 
         source.WriteLine("/// {0}", opDesc);
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
@@ -129,23 +110,8 @@ public class ShiftOperatorWriter(VectorType type, string op, string opDesc) : IT
         var fields = type.Columns > 1 ? VectorType.MatrixFields : VectorType.VectorFields;
         var resultCount = type.Columns > 1 ? type.Columns : type.Rows;
 
-        var bodyStr = new StringBuilder();
-        {
-            for (var i = 0; i < resultCount; i++)
-            {
-                if (type.Rows == 1)
-                {
-                    bodyStr.Append($"x {op} n");
-                    if (i != resultCount - 1) bodyStr.Append(", ");
-                }
-                else
-                {
-                    var lhsIndex = i;
-                    bodyStr.Append($"x.{fields[lhsIndex]} {op} n");
-                    if (i != resultCount - 1) bodyStr.Append(", ");
-                }
-            }
-        }
+        var bodyStr = string.Join(", ", Enumerable.Range(0, resultCount)
+            .Select(i => type.Rows == 1 ? $"x {op} n" : $"x.{fields[i]} {op} n"));
 
         source.WriteLine("/// {0}", opDesc);
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
@@ -164,19 +130,12 @@ public class UnaryOperatorWriter(VectorType type, string op, string opDesc) : IT
         var fields = type.Columns > 1 ? VectorType.MatrixFields : VectorType.VectorFields;
         var resultCount = type.Columns > 1 ? type.Columns : type.Rows;
 
-        var bodyStr = new StringBuilder();
-        {
-            for (var i = 0; i < resultCount; i++)
-            {
-                if (op == "-" && type is { BaseType: BaseType.UInt, Columns: 1 })
-                    bodyStr.Append($"(uint){op}val.{fields[i]}");
-                else
-                    bodyStr.Append($"{op}val.{fields[i]}");
-
-                if (i != resultCount - 1)
-                    bodyStr.Append(", ");
-            }
-        }
+        var bodyStr = string.Join(", ", Enumerable.Range(0, resultCount)
+            .Select(i =>
+                op == "-" && type is { BaseType: BaseType.UInt, Columns: 1 }
+                    ? $"(uint){op}val.{fields[i]}"
+                    : $"{op}val.{fields[i]}"
+            ));
 
         source.WriteLine("/// {0}", opDesc);
         source.WriteLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");

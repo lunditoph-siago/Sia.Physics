@@ -184,351 +184,113 @@ public static partial class math
 
     #endregion
 
-    #region min
+    #region is
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int min(int x, int y) => x < y ? x : y;
+    public static bool isfinite(float x) => abs(x) < float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 min(int2 x, int2 y) => new(min(x.x, y.x), min(x.y, y.y));
+    public static bool2 isfinite(float2 x) => abs(x) < float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int3 min(int3 x, int3 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z));
+    public static bool3 isfinite(float3 x) => abs(x) < float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int4 min(int4 x, int4 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z), min(x.w, y.w));
+    public static bool4 isfinite(float4 x) => abs(x) < float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint min(uint x, uint y) => x < y ? x : y;
+    public static bool isfinite(double x) => abs(x) < double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint2 min(uint2 x, uint2 y) => new(min(x.x, y.x), min(x.y, y.y));
+    public static bool2 isfinite(double2 x) => abs(x) < double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint3 min(uint3 x, uint3 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z));
+    public static bool3 isfinite(double3 x) => abs(x) < double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint4 min(uint4 x, uint4 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z), min(x.w, y.w));
+    public static bool4 isfinite(double4 x) => abs(x) < double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long min(long x, long y) => x < y ? x : y;
+    public static bool isinf(float x) => abs(x) == float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong min(ulong x, ulong y) => x < y ? x : y;
+    public static bool2 isinf(float2 x) => abs(x) == float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float min(float x, float y) => float.IsNaN(y) || x < y ? x : y;
+    public static bool3 isinf(float3 x) => abs(x) == float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float2 min(float2 x, float2 y) => new(min(x.x, y.x), min(x.y, y.y));
+    public static bool4 isinf(float4 x) => abs(x) == float.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float3 min(float3 x, float3 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z));
+    public static bool isinf(double x) => abs(x) == double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float4 min(float4 x, float4 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z), min(x.w, y.w));
+    public static bool2 isinf(double2 x) => abs(x) == double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double min(double x, double y) => double.IsNaN(y) || x < y ? x : y;
+    public static bool3 isinf(double3 x) => abs(x) == double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double2 min(double2 x, double2 y) => new(min(x.x, y.x), min(x.y, y.y));
+    public static bool4 isinf(double4 x) => abs(x) == double.PositiveInfinity;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double3 min(double3 x, double3 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z));
+    public static bool isnan(float x) => (asuint(x) & 0x7FFFFFFF) > 0x7F800000;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double4 min(double4 x, double4 y) => new(min(x.x, y.x), min(x.y, y.y), min(x.z, y.z), min(x.w, y.w));
-
-    #endregion
-
-    #region max
+    public static bool2 isnan(float2 x) => (asuint(x) & 0x7FFFFFFF) > 0x7F800000;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int max(int x, int y) => x > y ? x : y;
+    public static bool3 isnan(float3 x) => (asuint(x) & 0x7FFFFFFF) > 0x7F800000;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 max(int2 x, int2 y) => new(max(x.x, y.x), max(x.y, y.y));
+    public static bool4 isnan(float4 x) => (asuint(x) & 0x7FFFFFFF) > 0x7F800000;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int3 max(int3 x, int3 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z));
+    public static bool isnan(double x) => (asulong(x) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int4 max(int4 x, int4 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z), max(x.w, y.w));
+    public static bool2 isnan(double2 x) => bool2((asulong(x.x) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000, (asulong(x.y) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint max(uint x, uint y) => x > y ? x : y;
+    public static bool3 isnan(double3 x) => bool3((asulong(x.x) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000, (asulong(x.y) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000, (asulong(x.z) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint2 max(uint2 x, uint2 y) => new(max(x.x, y.x), max(x.y, y.y));
+    public static bool4 isnan(double4 x) => bool4((asulong(x.x) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000, (asulong(x.y) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000, (asulong(x.z) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000, (asulong(x.w) & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint3 max(uint3 x, uint3 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z));
+    public static bool ispow2(int x) => x > 0 && ((x & (x - 1)) == 0);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint4 max(uint4 x, uint4 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z), max(x.w, y.w));
+    public static bool2 ispow2(int2 x) => new(ispow2(x.x), ispow2(x.y));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long max(long x, long y) => x > y ? x : y;
+    public static bool3 ispow2(int3 x) => new(ispow2(x.x), ispow2(x.y), ispow2(x.z));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong max(ulong x, ulong y) => x > y ? x : y;
+    public static bool4 ispow2(int4 x) => new(ispow2(x.x), ispow2(x.y), ispow2(x.z), ispow2(x.w));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float max(float x, float y) => float.IsNaN(y) || x > y ? x : y;
+    public static bool ispow2(uint x) => x > 0 && ((x & (x - 1)) == 0);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float2 max(float2 x, float2 y) => new(max(x.x, y.x), max(x.y, y.y));
+    public static bool2 ispow2(uint2 x) => new(ispow2(x.x), ispow2(x.y));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float3 max(float3 x, float3 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z));
+    public static bool3 ispow2(uint3 x) => new(ispow2(x.x), ispow2(x.y), ispow2(x.z));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float4 max(float4 x, float4 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z), max(x.w, y.w));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double max(double x, double y) => double.IsNaN(y) || x > y ? x : y;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double2 max(double2 x, double2 y) => new(max(x.x, y.x), max(x.y, y.y));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double3 max(double3 x, double3 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double4 max(double4 x, double4 y) => new(max(x.x, y.x), max(x.y, y.y), max(x.z, y.z), max(x.w, y.w));
+    public static bool4 ispow2(uint4 x) => new(ispow2(x.x), ispow2(x.y), ispow2(x.z), ispow2(x.w));
 
     #endregion
 
-    #region any
+    #region cross
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(bool2 x) => x.x || x.y;
+    public static float3 cross(float3 x, float3 y) => (x * y.yzx - x.yzx * y).yzx;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(bool3 x) => x.x || x.y || x.z;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(bool4 x) => x.x || x.y || x.z || x.w;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(int2 x) => x.x != 0 || x.y != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(int3 x) => x.x != 0 || x.y != 0 || x.z != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(int4 x) => x.x != 0 || x.y != 0 || x.z != 0 || x.w != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(uint2 x) => x.x != 0 || x.y != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(uint3 x) => x.x != 0 || x.y != 0 || x.z != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(uint4 x) => x.x != 0 || x.y != 0 || x.z != 0 || x.w != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(float2 x) => x.x != 0.0f || x.y != 0.0f;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(float3 x) => x.x != 0.0f || x.y != 0.0f || x.z != 0.0f;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(float4 x) => x.x != 0.0f || x.y != 0.0f || x.z != 0.0f || x.w != 0.0f;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(double2 x) => x.x != 0.0 || x.y != 0.0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(double3 x) => x.x != 0.0 || x.y != 0.0 || x.z != 0.0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool any(double4 x) => x.x != 0.0 || x.y != 0.0 || x.z != 0.0 || x.w != 0.0;
-
-    #endregion
-
-    #region all
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(bool2 x) => x.x && x.y;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(bool3 x) => x.x && x.y && x.z;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(bool4 x) => x.x && x.y && x.z && x.w;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(int2 x) => x.x != 0 && x.y != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(int3 x) => x.x != 0 && x.y != 0 && x.z != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(int4 x) => x.x != 0 && x.y != 0 && x.z != 0 && x.w != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(uint2 x) => x.x != 0 && x.y != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(uint3 x) => x.x != 0 && x.y != 0 && x.z != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(uint4 x) => x.x != 0 && x.y != 0 && x.z != 0 && x.w != 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(float2 x) => x.x != 0.0f && x.y != 0.0f;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(float3 x) => x.x != 0.0f && x.y != 0.0f && x.z != 0.0f;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(float4 x) => x.x != 0.0f && x.y != 0.0f && x.z != 0.0f && x.w != 0.0f;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(double2 x) => x.x != 0.0 && x.y != 0.0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(double3 x) => x.x != 0.0 && x.y != 0.0 && x.z != 0.0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool all(double4 x) => x.x != 0.0 && x.y != 0.0 && x.z != 0.0 && x.w != 0.0;
-
-    #endregion
-
-    #region select
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int select(int a, int b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 select(int2 a, int2 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int3 select(int3 a, int3 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int4 select(int4 a, int4 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 select(int2 a, int2 b, bool2 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int3 select(int3 a, int3 b, bool3 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int4 select(int4 a, int4 b, bool4 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint select(uint a, uint b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint2 select(uint2 a, uint2 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint3 select(uint3 a, uint3 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint4 select(uint4 a, uint4 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint2 select(uint2 a, uint2 b, bool2 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint3 select(uint3 a, uint3 b, bool3 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint4 select(uint4 a, uint4 b, bool4 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long select(long a, long b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong select(ulong a, ulong b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float select(float a, float b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float2 select(float2 a, float2 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float3 select(float3 a, float3 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float4 select(float4 a, float4 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float2 select(float2 a, float2 b, bool2 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float3 select(float3 a, float3 b, bool3 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float4 select(float4 a, float4 b, bool4 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double select(double a, double b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double2 select(double2 a, double2 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double3 select(double3 a, double3 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double4 select(double4 a, double4 b, bool c) => c ? b : a;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double2 select(double2 a, double2 b, bool2 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double3 select(double3 a, double3 b, bool3 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double4 select(double4 a, double4 b, bool4 c) => new(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
-
-    #endregion
-
-    #region csum
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int csum(int2 x) => x.x + x.y;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int csum(int3 x) => x.x + x.y + x.z;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int csum(int4 x) => x.x + x.y + x.z + x.w;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint csum(uint2 x) => x.x + x.y;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint csum(uint3 x) => x.x + x.y + x.z;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static uint csum(uint4 x) => x.x + x.y + x.z + x.w;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float csum(float2 x) => x.x + x.y;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float csum(float3 x) => x.x + x.y + x.z;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-    public static float csum(float4 x) => (x.x + x.y) + (x.z + x.w);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-    public static double csum(double2 x) => x.x + x.y;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-    public static double csum(double3 x) => x.x + x.y + x.z;
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-    public static double csum(double4 x) => (x.x + x.y) + (x.z + x.w);
+    public static double3 cross(double3 x, double3 y) => (x * y.yzx - x.yzx * y).yzx;
 
     #endregion
 
@@ -641,6 +403,18 @@ public static partial class math
     #endregion
 
     // Internal
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float4 movelh(float4 a, float4 b) => shuffle(a, b, ShuffleComponent.LeftX, ShuffleComponent.LeftY, ShuffleComponent.RightX, ShuffleComponent.RightY);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static double4 movelh(double4 a, double4 b) => shuffle(a, b, ShuffleComponent.LeftX, ShuffleComponent.LeftY, ShuffleComponent.RightX, ShuffleComponent.RightY);
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float4 movehl(float4 a, float4 b) => shuffle(b, a, ShuffleComponent.LeftZ, ShuffleComponent.LeftW, ShuffleComponent.RightZ, ShuffleComponent.RightW);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static double4 movehl(double4 a, double4 b) => shuffle(b, a, ShuffleComponent.LeftZ, ShuffleComponent.LeftW, ShuffleComponent.RightZ, ShuffleComponent.RightW);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static uint fold_to_uint(double x)  // utility for double hashing

@@ -10,4 +10,8 @@
       <ProjectReference Include="..\Sia.Math\Sia.Math.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Sia" Version="2.0.10" />
+    </ItemGroup>
+
 </Project>

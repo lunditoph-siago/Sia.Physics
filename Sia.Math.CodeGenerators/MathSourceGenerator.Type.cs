@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Microsoft.CodeAnalysis;
 using Sia.Math.CodeGenerators.Builder;
 using Sia.Math.CodeGenerators.Writer;
 
@@ -7,7 +6,7 @@ namespace Sia.Math.CodeGenerators;
 
 public partial class MathSourceGenerator
 {
-    private static void AddTypeCode(ref GeneratorExecutionContext context, BaseType baseType, int rows, int columns, Features operations)
+    private static (string fileName, string sourceCode) AddTypeCode(BaseType baseType, int rows, int columns, Features operations)
     {
         var vectorType = new VectorType(baseType, rows, columns, operations);
         var compositeWriter = new CompositeWriter();
@@ -16,10 +15,13 @@ public partial class MathSourceGenerator
         compositeWriter.Add(new ConstructorsBuilder(vectorType).Build());
         compositeWriter.Add(new ConversionBuilder(vectorType).Build());
         compositeWriter.Add(new OperatorsBuilder(vectorType).Build());
+        compositeWriter.Add(new SwizzlesBuilder(vectorType).Build());
         compositeWriter.Add(new EqualsWriter(vectorType));
         compositeWriter.Add(new HashBuilder(vectorType).Build());
         compositeWriter.Add(new ToStringWriter(vectorType));
         compositeWriter.Add(new DebuggerTypeProxyBuilder(vectorType).Build());
+        compositeWriter.Add(new ShuffleBuilder(vectorType).Build());
+        compositeWriter.Add(new InverseWriter(vectorType));
 
         var typeSource = Generator.CreateFileSource(out var sourceBuilder);
 
@@ -53,6 +55,6 @@ public partial class MathSourceGenerator
             }
         }
 
-        context.AddSource($"{vectorType.TypeName}.g.cs", sourceBuilder.ToString());        
+        return ($"{vectorType.TypeName}.g.cs", sourceBuilder.ToString());
     }
 }

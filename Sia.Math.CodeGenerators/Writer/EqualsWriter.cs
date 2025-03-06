@@ -8,7 +8,7 @@ namespace Sia.Math.CodeGenerators.Writer;
 
 public class EqualsWriter(VectorType type) : ITypeSourceWriter
 {
-    public HashSet<string> Imports { get; } = ["System.Diagnostics.CodeAnalysis", "System.Runtime.CompilerServices", "System.Runtime.Intrinsics"];
+    public HashSet<string> Imports { get; } = ["System.Diagnostics.CodeAnalysis", "System.Runtime.CompilerServices"];
 
     public HashSet<string> Inherits { get; } = [$"System.IEquatable<{type.TypeName}>"];
 
@@ -26,52 +26,12 @@ public class EqualsWriter(VectorType type) : ITypeSourceWriter
         source.WriteLine("{");
         source.Indent++;
         {
-            if (type is { Columns: 1, BaseType: not BaseType.Bool })
-            {
-                source.WriteLine("if (Vector64.IsHardwareAccelerated)");
-                source.WriteLine("{");
-                source.Indent++;
-                {
-                    source.WriteLine("return Vector64.LoadUnsafe(ref Unsafe.AsRef(in x)).Equals(Vector64.LoadUnsafe(ref other.x));");
-                }
-                source.Indent--;
-                source.WriteLine("}");
-                source.WriteLine("else if (Vector128.IsHardwareAccelerated)");
-                source.WriteLine("{");
-                source.Indent++;
-                {
-                    source.WriteLine("var (lhs, rhs) = (new {0}4({1}), new {0}4({2}));",
-                        type.BaseTypeName,
-                        string.Join(", ",
-                        [
-                            "this",
-                            ..Enumerable.Range(0, 4 - type.Rows)
-                                .Select(_ => type.BaseType.ToTypedLiteral(0))
-                        ]),
-                        string.Join(", ",
-                        [
-                            "other",
-                            ..Enumerable.Range(0, 4 - type.Rows)
-                                .Select(_ => type.BaseType.ToTypedLiteral(0))
-                        ]));
-                    source.WriteLine("return Unsafe.As<{0}4, Vector128<{0}>>(ref lhs).Equals(Unsafe.As<{0}4, Vector128<{0}>>(ref rhs));", type.BaseTypeName);
-                }
-                source.Indent--;
-                source.WriteLine("}");
-                source.WriteLineNoTabs(string.Empty);
-            }
+            var compareConditions = Enumerable.Range(0, resultCount)
+                .Select(i => type.Columns == 1 
+                    ? $"{fields[i]} == other.{fields[i]}" 
+                    : $"{fields[i]}.Equals(other.{fields[i]})");
 
-            var compareStr = new StringBuilder();
-            {
-                for (var i = 0; i < resultCount; i++)
-                {
-                    compareStr.Append(type.Columns == 1 ? $"{fields[i]} == other.{fields[i]}" : $"{fields[i]}.Equals(other.{fields[i]})");
-
-                    if (i != resultCount - 1) compareStr.Append(" && ");
-                }
-            }
-
-            source.WriteLine("return {0};", compareStr);
+            source.WriteLine("return {0};", string.Join(" && ", compareConditions));
         }
         source.Indent--;
         source.WriteLine("}");

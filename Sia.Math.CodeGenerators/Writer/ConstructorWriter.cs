@@ -68,9 +68,12 @@ public class VectorConstructorWriter(VectorType type, int numParameters, int[] p
             .Select(g => type.BaseType.ToTypeDescription(g.Key, 1, g.Count()))
             .ToList();
 
+        var parameterDesc = parameterParts.Count > 1
+            ? $"{string.Join(", ", parameterParts.Take(parameterParts.Count - 1))} and {parameterParts.Last()}"
+            : parameterParts.Last();
         var descriptions = new List<string>
         {
-            $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> {typeCategory} from {string.Join(", ", parameterParts.Take(parameterParts.Count - 1))} and {parameterParts.Last()}.</summary>"
+            $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> {typeCategory} from {parameterDesc}.</summary>"
         };
 
         descriptions.AddRange(parameterComponents.Take(numParameters)
@@ -141,10 +144,8 @@ public class MatrixColumnConstructorWriter(VectorType type) : ICompositeWriter
             $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> matrix from {type.BaseType.ToTypeDescription(type.Rows, 1, type.Columns)}.</summary>"
         };
 
-        for (var col = 0; col < type.Columns; ++col)
-        {
-            descriptions.Add($"/// <param name=\"{VectorType.MatrixFields[col]}\">The value to assign to the <see cref=\"{VectorType.MatrixFields[col]}\" /> field.</param>");
-        }
+        descriptions.AddRange(Enumerable.Range(0, type.Columns)
+            .Select(i => $"/// <param name=\"{VectorType.MatrixFields[i]}\">The value to assign to the <see cref=\"{VectorType.MatrixFields[i]}\" /> field.</param>"));
 
         descriptions.Add($"/// <returns>The <see cref=\"{type.TypeName}\" /> constructed from arguments.</returns>");
 
@@ -186,8 +187,8 @@ public class MatrixRowConstructorWriter(VectorType type) : ICompositeWriter
 
     public Action<IndentedTextWriter> MathSourceWriter => source =>
     {
-        var bodyBuilder = string.Join(", ", Enumerable.Range(0, type.Columns)
-            .SelectMany(column => Enumerable.Range(0, type.Rows).Select(row => $"m{row}{column}")));
+        var bodyBuilder = string.Join(", ", Enumerable.Range(0, type.Rows * type.Columns)
+            .Select(i => $"m{i / type.Columns}{i % type.Columns}"));
 
         foreach (var description in m_Descriptions) source.WriteLine(description);
 
@@ -202,13 +203,12 @@ public class MatrixRowConstructorWriter(VectorType type) : ICompositeWriter
             $"/// <summary>Constructs a <see cref=\"{type.TypeName}\" /> matrix from {type.Rows * type.Columns} <see cref=\"{type.BaseTypeName}\" /> values given in row-major order.</summary>"
         };
 
-        for (var row = 0; row < type.Rows; ++row)
-        {
-            for (var col = 0; col < type.Columns; ++col)
+        descriptions.AddRange(Enumerable.Range(0, type.Rows * type.Columns)
+            .Select(i =>
             {
-                descriptions.Add($"/// <param name=\"m{row}{col}\">The value to assign to the {(col + 1).FormatOrdinals()} element in the {(row + 1).FormatOrdinals()} row.</param>");
-            }
-        }
+                var (row, column) = (i / type.Columns, i % type.Columns);
+                return $"/// <param name=\"m{row}{column}\">The value to assign to the {(column + 1).FormatOrdinals()} element in the {(row + 1).FormatOrdinals()} row.</param>";
+            }));
 
         descriptions.Add($"/// <returns>The <see cref=\"{type.TypeName}\" /> constructed from arguments.</returns>");
 

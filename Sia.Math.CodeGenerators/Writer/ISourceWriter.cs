@@ -73,6 +73,45 @@ public class TypeOnlyCompositeWriter : ICompositeWriter
     }
 }
 
+public class MathOnlyCompositeWriter : ICompositeWriter
+{
+    private readonly List<IMathSourceWriter> m_MathSourceWriters = [];
+
+    public HashSet<string> Imports { get; } = [];
+
+    public HashSet<string> Inherits { get; } = [];
+
+    public Action<IndentedTextWriter>? TypeSourceWriter => null;
+
+    public Action<IndentedTextWriter> MathSourceWriter => source =>
+    {
+        for (var i = 0; i < m_MathSourceWriters.Count; i++)
+        {
+            var sourceWriter = m_MathSourceWriters[i];
+            if (sourceWriter.MathSourceWriter != null)
+            {
+                if (i != 0 && i < m_MathSourceWriters.Count)
+                {
+                    source.WriteLineNoTabs(string.Empty);
+                }
+
+                sourceWriter.MathSourceWriter.Invoke(source);
+            }
+        }
+    };
+
+    public void Add<T>(T writer) where T : class
+    {
+        if (writer is IMathSourceWriter typeSourceWriter)
+        {
+            Imports.UnionWith(typeSourceWriter.Imports);
+            Inherits.UnionWith(typeSourceWriter.Inherits);
+
+            m_MathSourceWriters.Add(typeSourceWriter);
+        }
+    }
+}
+
 public class CompositeWriter : ICompositeWriter
 {
     private readonly List<ITypeSourceWriter> m_TypeSourceWriters = [];

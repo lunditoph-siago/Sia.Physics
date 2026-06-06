@@ -1,0 +1,16 @@
+[Bb]in/
+[Oo]bj/
+.idea/
+.vs/
+.vscode/
+.backup/
+temp_check/
+TestResults/
+BenchmarkDotNet.Artifacts/
+*.user
+*.suo
+*.log
+*.tmp
+*.swp
+*.*~
+

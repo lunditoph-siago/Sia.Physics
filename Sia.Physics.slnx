@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="Sia.Physics.Tests/Sia.Physics.Tests.csproj" />
+  </Folder>
+  <Project Path="Sia.Physics/Sia.Physics.csproj" />
+</Solution>
+

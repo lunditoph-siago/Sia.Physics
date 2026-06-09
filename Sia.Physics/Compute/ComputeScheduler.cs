@@ -43,5 +43,5 @@ public sealed class ComputeScheduler
         return new WorkRange(start, end - start);
     }
 
-    private static int DivideRoundUp(int value, int divisor) => (value + divisor - 1) / divisor;
+    private static int DivideRoundUp(int value, int divisor) => (value - 1) / divisor + 1;
 }

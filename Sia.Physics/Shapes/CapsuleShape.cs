@@ -18,10 +18,10 @@ public readonly record struct CapsuleShape : IConvexShape<CapsuleShape>
 
     public float HalfLength { get; }
 
-    public static BoundingBox ComputeBounds(in CapsuleShape shape, in Pose pose)
+    public static Aabb ComputeBounds(in CapsuleShape shape, in RigidTransform pose)
     {
         var extents = new float3(shape.Radius, shape.HalfLength + shape.Radius, shape.Radius);
-        return GeometryMath.Transform(new BoundingBox(-extents, extents), pose);
+        return GeometryMath.Transform(new Aabb(-extents, extents), pose);
     }
 
     public static MassProperties ComputeMass(in CapsuleShape shape, float density)
@@ -41,4 +41,3 @@ public readonly record struct CapsuleShape : IConvexShape<CapsuleShape>
         return GeometryMath.NormalizeOr(direction, new float3(1f, 0f, 0f)) * shape.Radius + new float3(0f, offset, 0f);
     }
 }
-

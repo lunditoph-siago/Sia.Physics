@@ -14,8 +14,8 @@ public readonly record struct BoxShape : IConvexShape<BoxShape>
 
     public float3 HalfExtents { get; }
 
-    public static BoundingBox ComputeBounds(in BoxShape shape, in Pose pose) =>
-        GeometryMath.Transform(new BoundingBox(-shape.HalfExtents, shape.HalfExtents), pose);
+    public static Aabb ComputeBounds(in BoxShape shape, in RigidTransform pose) =>
+        GeometryMath.Transform(new Aabb(-shape.HalfExtents, shape.HalfExtents), pose);
 
     public static MassProperties ComputeMass(in BoxShape shape, float density)
     {
@@ -30,4 +30,3 @@ public readonly record struct BoxShape : IConvexShape<BoxShape>
         direction.y < 0f ? -shape.HalfExtents.y : shape.HalfExtents.y,
         direction.z < 0f ? -shape.HalfExtents.z : shape.HalfExtents.z);
 }
-

@@ -14,8 +14,8 @@ public readonly record struct SphereShape : IConvexShape<SphereShape>
 
     public float Radius { get; }
 
-    public static BoundingBox ComputeBounds(in SphereShape shape, in Pose pose) =>
-        new(pose.Position - shape.Radius, pose.Position + shape.Radius);
+    public static Aabb ComputeBounds(in SphereShape shape, in RigidTransform pose) =>
+        new(pose.Translation - shape.Radius, pose.Translation + shape.Radius);
 
     public static MassProperties ComputeMass(in SphereShape shape, float density)
     {
@@ -27,4 +27,3 @@ public readonly record struct SphereShape : IConvexShape<SphereShape>
     public static float3 Support(in SphereShape shape, float3 direction) =>
         GeometryMath.NormalizeOr(direction, new float3(1f, 0f, 0f)) * shape.Radius;
 }
-

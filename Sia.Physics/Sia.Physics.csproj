@@ -10,6 +10,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Sia.NET\Sia\Sia.csproj" />
+    <ProjectReference Include="..\..\Sia.NET\Sia.CodeGenerators\Sia.CodeGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\Sia.Math\Sia.Math\Sia.Math.csproj" />
   </ItemGroup>
 

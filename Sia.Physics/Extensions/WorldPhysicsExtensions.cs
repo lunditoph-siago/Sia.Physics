@@ -1,0 +1,40 @@
+namespace Sia.Physics;
+
+public static class WorldPhysicsExtensions
+{
+    public static PhysicsShapes GetPhysicsShapes(this World world) =>
+        world.AcquireAddon<PhysicsShapes>();
+
+    public static PhysicsConfiguration GetPhysicsConfiguration(this World world) =>
+        world.AcquireAddon<PhysicsConfiguration>();
+
+    public static Entity CreateDynamicBody(
+        this World world,
+        in RigidTransform pose,
+        ShapeHandle shape,
+        float density,
+        PhysicsVelocity velocity = default,
+        PhysicsCollider? collider = null,
+        PhysicsDamping? damping = null,
+        PhysicsGravityScale? gravityScale = null)
+    {
+        var mass = world.GetPhysicsShapes().ComputeMass(shape, density);
+        return world.CreateUnmanaged(HList.From(
+            pose,
+            velocity,
+            PhysicsBody.Dynamic(shape, mass),
+            collider ?? PhysicsCollider.Default,
+            damping ?? PhysicsDamping.Default,
+            gravityScale ?? PhysicsGravityScale.Default));
+    }
+
+    public static Entity CreateStaticBody(
+        this World world,
+        in RigidTransform pose,
+        ShapeHandle shape,
+        PhysicsCollider? collider = null) => world.CreateUnmanaged(HList.From(
+            pose,
+            PhysicsBody.Static(shape),
+            collider ?? PhysicsCollider.Default));
+}
+

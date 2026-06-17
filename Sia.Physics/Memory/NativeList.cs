@@ -30,6 +30,20 @@ public sealed class NativeList<T> : IDisposable where T : unmanaged
 
     public void Add(in T value) => Add() = value;
 
+    public void RemoveAtSwapBack(int index)
+    {
+        if ((uint)index >= (uint)Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
+
+        var last = --Count;
+        if (index != last)
+        {
+            _buffer[index] = _buffer[last];
+        }
+    }
+
     public void Clear(bool clearMemory = false)
     {
         if (clearMemory)

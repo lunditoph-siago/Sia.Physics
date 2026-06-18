@@ -32,6 +32,8 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     internal void AddPair(in BodyPair pair) => _pairs.Add(pair);
 
+    internal void ClearPairs() => _pairs.Clear();
+
     public void OnUninitialize(World world) => Dispose();
 
     public void Dispose()
@@ -41,4 +43,3 @@ public sealed class PhysicsFrame : IAddon, IDisposable
         _pairs.Dispose();
     }
 }
-

@@ -7,6 +7,7 @@ public sealed class PhysicsFrame : IAddon, IDisposable
     private readonly NativeList<Aabb> _bounds = new(128);
     private readonly NativeList<BodyPair> _pairs = new(256);
     private readonly NativeList<ContactManifold> _contacts = new(256);
+    private readonly NativeList<ContactConstraint> _constraints = new(256);
 
     public IReadOnlyList<Entity> Entities => _entities;
 
@@ -18,6 +19,8 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     public ReadOnlySpan<ContactManifold> Contacts => _contacts.ReadOnlySpan;
 
+    internal Span<ContactConstraint> Constraints => _constraints.Span;
+
     internal void BeginBuild()
     {
         _entities.Clear();
@@ -25,6 +28,7 @@ public sealed class PhysicsFrame : IAddon, IDisposable
         _bounds.Clear();
         _pairs.Clear();
         _contacts.Clear();
+        _constraints.Clear();
     }
 
     internal void Add(Entity entity, in BodyState body, in Aabb bounds)
@@ -42,6 +46,10 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     internal void ClearContacts() => _contacts.Clear();
 
+    internal void AddConstraint(in ContactConstraint constraint) => _constraints.Add(constraint);
+
+    internal void ClearConstraints() => _constraints.Clear();
+
     public void OnUninitialize(World world) => Dispose();
 
     public void Dispose()
@@ -50,5 +58,6 @@ public sealed class PhysicsFrame : IAddon, IDisposable
         _bounds.Dispose();
         _pairs.Dispose();
         _contacts.Dispose();
+        _constraints.Dispose();
     }
 }

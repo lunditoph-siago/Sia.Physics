@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 namespace Sia.Physics;
 
 [SiaSystem]
+[SiaAfter<IntegratePhysicsSystem>]
 public sealed class BuildPhysicsFrameSystem : SystemBase
 {
     private PhysicsFrame _frame = null!;
@@ -36,4 +37,3 @@ public sealed class BuildPhysicsFrameSystem : SystemBase
         }
     }
 }
-

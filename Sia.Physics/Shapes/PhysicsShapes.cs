@@ -36,6 +36,28 @@ public sealed class PhysicsShapes : IAddon, IDisposable
         _ => throw new NotSupportedException($"Shape type {handle.Type} is not registered.")
     };
 
+    public bool Raycast(
+        ShapeHandle handle,
+        in RigidTransform pose,
+        in PhysicsRay ray,
+        out float distance,
+        out float3 normal)
+    {
+        switch (handle.Type)
+        {
+            case ShapeType.Sphere:
+                return ShapeRaycast.Cast(_spheres.Get(handle), pose, ray, out distance, out normal);
+            case ShapeType.Box:
+                return ShapeRaycast.Cast(_boxes.Get(handle), pose, ray, out distance, out normal);
+            case ShapeType.Capsule:
+                return ShapeRaycast.Cast(_capsules.Get(handle), pose, ray, out distance, out normal);
+            default:
+                distance = default;
+                normal = default;
+                return false;
+        }
+    }
+
     public void OnUninitialize(World world) => Dispose();
 
     public void Dispose()
@@ -45,4 +67,3 @@ public sealed class PhysicsShapes : IAddon, IDisposable
         _capsules.Dispose();
     }
 }
-

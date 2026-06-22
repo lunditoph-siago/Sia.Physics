@@ -22,5 +22,31 @@ public sealed class PhysicsQueryTests
         Assert.Equal(2f, collector.Hit.Distance, 5);
         Assert.Equal(new float3(-1f, 0f, 0f), collector.Hit.Normal);
     }
-}
 
+    [Fact]
+    public void OverlapAabbHonorsCollisionFilter()
+    {
+        using var world = new World();
+        var shapes = world.GetPhysicsShapes();
+        var sphere = shapes.Add(new SphereShape(1f));
+        var ignored = new PhysicsCollider(new CollisionFilter(1, 1), PhysicsMaterial.Default);
+        world.CreateStaticBody(RigidTransform.Identity, sphere, ignored);
+        var expected = world.CreateStaticBody(
+            RigidTransform.Translate(new float3(2f, 0f, 0f)),
+            sphere,
+            new PhysicsCollider(new CollisionFilter(2, 2), PhysicsMaterial.Default));
+        using var stage = SystemChain.Empty.Add<BuildPhysicsFrameSystem>().CreateStage(world);
+        stage.Tick();
+
+        var collector = new AnyOverlapCollector();
+        var filter = new PhysicsQueryFilter(new CollisionFilter(2, 2));
+        PhysicsQueries.OverlapAabb(
+            world.GetAddon<PhysicsFrame>(),
+            new Aabb(new float3(-1f), new float3(3f)),
+            filter,
+            ref collector);
+
+        Assert.True(collector.HasHit);
+        Assert.Equal(expected, collector.Hit.Entity);
+    }
+}

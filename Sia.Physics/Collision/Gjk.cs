@@ -2,29 +2,18 @@ namespace Sia.Physics;
 
 internal static class Gjk
 {
-    private struct Simplex
-    {
-        public SupportPoint A;
-        public SupportPoint B;
-        public SupportPoint C;
-        public SupportPoint D;
-        public int Count;
+    public static bool Intersects(PhysicsShapes shapes, in BodyState first, in BodyState second) =>
+        TryGetSimplex(shapes, first, second, out _);
 
-        public void PushFront(in SupportPoint point)
-        {
-            D = C;
-            C = B;
-            B = A;
-            A = point;
-            Count = System.Math.Min(Count + 1, 4);
-        }
-    }
-
-    public static bool Intersects(PhysicsShapes shapes, in BodyState first, in BodyState second)
+    public static bool TryGetSimplex(
+        PhysicsShapes shapes,
+        in BodyState first,
+        in BodyState second,
+        out GjkSimplex simplex)
     {
         var direction = second.Pose.Translation - first.Pose.Translation;
         direction = GeometryMath.NormalizeOr(direction, new float3(1f, 0f, 0f));
-        var simplex = new Simplex();
+        simplex = new GjkSimplex();
         simplex.PushFront(ConvexSupport.Get(shapes, first, second, direction));
         direction = -simplex.A.Difference;
 
@@ -51,7 +40,7 @@ internal static class Gjk
         return false;
     }
 
-    private static bool ContainsOrigin(ref Simplex simplex, ref float3 direction) => simplex.Count switch
+    private static bool ContainsOrigin(ref GjkSimplex simplex, ref float3 direction) => simplex.Count switch
     {
         2 => SolveLine(ref simplex, ref direction),
         3 => SolveTriangle(ref simplex, ref direction),
@@ -59,7 +48,7 @@ internal static class Gjk
         _ => false
     };
 
-    private static bool SolveLine(ref Simplex simplex, ref float3 direction)
+    private static bool SolveLine(ref GjkSimplex simplex, ref float3 direction)
     {
         var a = simplex.A.Difference;
         var b = simplex.B.Difference;
@@ -77,7 +66,7 @@ internal static class Gjk
         return false;
     }
 
-    private static bool SolveTriangle(ref Simplex simplex, ref float3 direction)
+    private static bool SolveTriangle(ref GjkSimplex simplex, ref float3 direction)
     {
         var a = simplex.A.Difference;
         var b = simplex.B.Difference;
@@ -118,7 +107,7 @@ internal static class Gjk
         return false;
     }
 
-    private static bool SolveTetrahedron(ref Simplex simplex, ref float3 direction)
+    private static bool SolveTetrahedron(ref GjkSimplex simplex, ref float3 direction)
     {
         var a = simplex.A.Difference;
         var ao = -a;
@@ -171,4 +160,3 @@ internal static class Gjk
         return math.cross(left, axis);
     }
 }
-

@@ -36,6 +36,8 @@ public sealed class PhysicsShapes : IAddon, IDisposable
             ConvexHullMath.ComputeLocalBounds(vertices)));
     }
 
+    internal ref readonly SphereShape GetSphere(ShapeHandle handle) => ref _spheres.Get(handle);
+
     public Aabb ComputeBounds(ShapeHandle handle, in RigidTransform pose) => handle.Type switch
     {
         ShapeType.Sphere => SphereShape.ComputeBounds(_spheres.Get(handle), pose),

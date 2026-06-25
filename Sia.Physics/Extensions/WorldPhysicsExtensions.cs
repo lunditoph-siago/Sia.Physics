@@ -36,5 +36,19 @@ public static class WorldPhysicsExtensions
             pose,
             PhysicsBody.Static(shape),
             collider ?? PhysicsCollider.Default));
-}
 
+    public static Entity CreateDistanceJoint(
+        this World world,
+        Entity first,
+        Entity second,
+        float restLength,
+        float3 localAnchorA = default,
+        float3 localAnchorB = default,
+        float compliance = 0f) => world.CreateUnmanaged(HList.From(new DistanceJoint(
+            first.Id,
+            second.Id,
+            restLength,
+            localAnchorA,
+            localAnchorB,
+            compliance)));
+}

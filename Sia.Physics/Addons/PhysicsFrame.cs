@@ -8,6 +8,7 @@ public sealed class PhysicsFrame : IAddon, IDisposable
     private readonly NativeList<BodyPair> _pairs = new(256);
     private readonly NativeList<ContactManifold> _contacts = new(256);
     private readonly NativeList<ContactConstraint> _constraints = new(256);
+    private readonly NativeList<DistanceJointConstraint> _distanceJoints = new(64);
 
     public IReadOnlyList<Entity> Entities => _entities;
 
@@ -21,6 +22,8 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     internal Span<ContactConstraint> Constraints => _constraints.Span;
 
+    internal Span<DistanceJointConstraint> DistanceJoints => _distanceJoints.Span;
+
     internal void BeginBuild()
     {
         _entities.Clear();
@@ -29,6 +32,7 @@ public sealed class PhysicsFrame : IAddon, IDisposable
         _pairs.Clear();
         _contacts.Clear();
         _constraints.Clear();
+        _distanceJoints.Clear();
     }
 
     internal void Add(Entity entity, in BodyState body, in Aabb bounds)
@@ -50,6 +54,23 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     internal void ClearConstraints() => _constraints.Clear();
 
+    internal void AddDistanceJoint(in DistanceJointConstraint constraint) => _distanceJoints.Add(constraint);
+
+    internal bool TryGetBodyIndex(EntityId id, out int bodyIndex)
+    {
+        for (var i = 0; i < _entities.Count; i++)
+        {
+            if (_entities[i].Id == id)
+            {
+                bodyIndex = i;
+                return true;
+            }
+        }
+
+        bodyIndex = -1;
+        return false;
+    }
+
     public void OnUninitialize(World world) => Dispose();
 
     public void Dispose()
@@ -59,5 +80,6 @@ public sealed class PhysicsFrame : IAddon, IDisposable
         _pairs.Dispose();
         _contacts.Dispose();
         _constraints.Dispose();
+        _distanceJoints.Dispose();
     }
 }

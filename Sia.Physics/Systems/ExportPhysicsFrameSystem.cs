@@ -4,6 +4,7 @@ namespace Sia.Physics;
 
 [SiaSystem]
 [SiaAfter<SolveContactsSystem>]
+[SiaAfter<SolveDistanceJointsSystem>]
 public sealed class ExportPhysicsFrameSystem : SystemBase
 {
     private PhysicsFrame _frame = null!;
@@ -32,4 +33,3 @@ public sealed class ExportPhysicsFrameSystem : SystemBase
         }
     }
 }
-

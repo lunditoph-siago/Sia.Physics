@@ -28,12 +28,22 @@ public sealed class BuildPhysicsFrameSystem : SystemBase
             ref var body = ref entity.Get<PhysicsBody>();
             ref var collider = ref entity.Get<PhysicsCollider>();
             ref var velocity = ref entity.GetOrNullRef<PhysicsVelocity>();
+            ref var previousPose = ref entity.GetOrNullRef<PhysicsPreviousPose>();
+            ref var continuous = ref entity.GetOrNullRef<ContinuousCollision>();
+            var priorPose = Unsafe.IsNullRef(ref previousPose) ? pose : previousPose.Value;
             var state = new BodyState(
                 pose,
                 Unsafe.IsNullRef(ref velocity) ? PhysicsVelocity.Zero : velocity,
                 body,
-                collider);
-            _frame.Add(entity, state, _shapes.ComputeBounds(body.Shape, pose));
+                collider,
+                priorPose,
+                !Unsafe.IsNullRef(ref continuous));
+            var bounds = _shapes.ComputeBounds(body.Shape, pose);
+            if (state.IsContinuous)
+            {
+                bounds = Aabb.Union(bounds, _shapes.ComputeBounds(body.Shape, priorPose));
+            }
+            _frame.Add(entity, state, bounds);
         }
     }
 }

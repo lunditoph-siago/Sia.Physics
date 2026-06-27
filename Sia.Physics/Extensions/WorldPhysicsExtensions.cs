@@ -25,7 +25,30 @@ public static class WorldPhysicsExtensions
             PhysicsBody.Dynamic(shape, mass),
             collider ?? PhysicsCollider.Default,
             damping ?? PhysicsDamping.Default,
-            gravityScale ?? PhysicsGravityScale.Default));
+            gravityScale ?? PhysicsGravityScale.Default,
+            new PhysicsPreviousPose(pose)));
+    }
+
+    public static Entity CreateContinuousBody(
+        this World world,
+        in RigidTransform pose,
+        ShapeHandle shape,
+        float density,
+        PhysicsVelocity velocity = default,
+        PhysicsCollider? collider = null,
+        PhysicsDamping? damping = null,
+        PhysicsGravityScale? gravityScale = null)
+    {
+        var mass = world.GetPhysicsShapes().ComputeMass(shape, density);
+        return world.CreateUnmanaged(HList.From(
+            pose,
+            velocity,
+            PhysicsBody.Dynamic(shape, mass),
+            collider ?? PhysicsCollider.Default,
+            damping ?? PhysicsDamping.Default,
+            gravityScale ?? PhysicsGravityScale.Default,
+            new PhysicsPreviousPose(pose),
+            new ContinuousCollision()));
     }
 
     public static Entity CreateStaticBody(

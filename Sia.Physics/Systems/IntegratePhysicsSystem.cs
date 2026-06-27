@@ -6,7 +6,8 @@ public sealed class IntegratePhysicsSystem : ParallelSystemBase<
     PhysicsVelocity,
     PhysicsBody,
     PhysicsDamping,
-    PhysicsGravityScale>
+    PhysicsGravityScale,
+    PhysicsPreviousPose>
 {
     private PhysicsConfiguration _configuration = null!;
 
@@ -21,7 +22,8 @@ public sealed class IntegratePhysicsSystem : ParallelSystemBase<
         ref PhysicsVelocity velocity,
         ref PhysicsBody body,
         ref PhysicsDamping damping,
-        ref PhysicsGravityScale gravityScale)
+        ref PhysicsGravityScale gravityScale,
+        ref PhysicsPreviousPose previousPose)
     {
         if (!body.IsDynamic)
         {
@@ -29,6 +31,7 @@ public sealed class IntegratePhysicsSystem : ParallelSystemBase<
         }
 
         var deltaTime = _configuration.FixedDeltaTime;
+        previousPose.Value = pose;
         velocity.Linear += _configuration.Gravity * gravityScale.Value * deltaTime;
         velocity.Linear *= MathF.Exp(-damping.Linear * deltaTime);
         velocity.Angular *= MathF.Exp(-damping.Angular * deltaTime);
@@ -42,4 +45,3 @@ public sealed class IntegratePhysicsSystem : ParallelSystemBase<
         }
     }
 }
-

@@ -6,17 +6,22 @@ public struct BodyState
     public PhysicsVelocity Velocity;
     public PhysicsBody Body;
     public PhysicsCollider Collider;
+    public RigidTransform PreviousPose;
+    public bool IsContinuous;
 
     public BodyState(
         in RigidTransform pose,
         in PhysicsVelocity velocity,
         in PhysicsBody body,
-        in PhysicsCollider collider)
+        in PhysicsCollider collider,
+        in RigidTransform previousPose,
+        bool isContinuous)
     {
         Pose = pose;
         Velocity = velocity;
         Body = body;
         Collider = collider;
+        PreviousPose = previousPose;
+        IsContinuous = isContinuous;
     }
 }
-

@@ -10,15 +10,18 @@ public static class Narrowphase
         {
             ref var first = ref bodies[pair.First];
             ref var second = ref bodies[pair.Second];
-            if (!Gjk.TryGetSimplex(shapes, first, second, out var simplex))
+            var intersects = Gjk.TryGetSimplex(shapes, first, second, out var simplex);
+            var point = float3.zero;
+            var normal = float3.zero;
+            var penetration = 0f;
+            if (!intersects &&
+                !ContinuousContact.TryBuild(shapes, ref first, ref second, out point, out normal, out penetration))
             {
                 continue;
             }
 
-            float3 point;
-            float3 normal;
-            float penetration;
-            if (!PrimitiveContact.TryBuild(shapes, first, second, out point, out normal, out penetration) &&
+            if (intersects &&
+                !PrimitiveContact.TryBuild(shapes, first, second, out point, out normal, out penetration) &&
                 !Epa.TrySolve(shapes, first, second, simplex, out point, out normal, out penetration))
             {
                 normal = GeometryMath.NormalizeOr(

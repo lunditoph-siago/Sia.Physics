@@ -5,19 +5,36 @@ public sealed class SweepBroadphase : IAddon, IDisposable
     private readonly NativeList<SweepEndpoint> _endpoints = new(256);
     private readonly NativeList<int> _active = new(64);
 
+    internal SweepAxis ProjectionAxis { get; private set; }
+
+    internal int LastSortSwapCount { get; private set; }
+
     public void Build(PhysicsFrame frame)
     {
-        _endpoints.Clear();
         _active.Clear();
         frame.ClearPairs();
 
         var bounds = frame.Bounds;
-        for (var i = 0; i < bounds.Length; i++)
+        ProjectionAxis = SelectAxis(bounds);
+        if (_endpoints.Count != bounds.Length * 2)
         {
-            _endpoints.Add(new SweepEndpoint(bounds[i].Min.x, i, IsMaximum: false));
-            _endpoints.Add(new SweepEndpoint(bounds[i].Max.x, i, IsMaximum: true));
+            _endpoints.Clear();
+            for (var i = 0; i < bounds.Length; i++)
+            {
+                _endpoints.Add(CreateEndpoint(bounds[i], i, isMaximum: false));
+                _endpoints.Add(CreateEndpoint(bounds[i], i, isMaximum: true));
+            }
+            _endpoints.Span.Sort();
+            LastSortSwapCount = 0;
         }
-        _endpoints.Span.Sort();
+        else
+        {
+            foreach (ref var endpoint in _endpoints.Span)
+            {
+                endpoint = CreateEndpoint(bounds[endpoint.BodyIndex], endpoint.BodyIndex, endpoint.IsMaximum);
+            }
+            LastSortSwapCount = SweepSort.InsertionSort(_endpoints.Span);
+        }
 
         var bodies = frame.Bodies;
         foreach (ref readonly var endpoint in _endpoints.ReadOnlySpan)
@@ -28,7 +45,7 @@ public sealed class SweepBroadphase : IAddon, IDisposable
                 for (var i = 0; i < _active.Count; i++)
                 {
                     var other = _active[i];
-                    if (!OverlapsYZ(candidateBounds, bounds[other]))
+                    if (!OverlapsOtherAxes(candidateBounds, bounds[other]))
                     {
                         continue;
                     }
@@ -62,9 +79,52 @@ public sealed class SweepBroadphase : IAddon, IDisposable
         }
     }
 
-    private static bool OverlapsYZ(in Aabb left, in Aabb right) =>
-        left.Max.y >= right.Min.y && left.Min.y <= right.Max.y &&
-        left.Max.z >= right.Min.z && left.Min.z <= right.Max.z;
+    private SweepEndpoint CreateEndpoint(in Aabb bounds, int bodyIndex, bool isMaximum)
+    {
+        var point = isMaximum ? bounds.Max : bounds.Min;
+        var value = ProjectionAxis switch
+        {
+            SweepAxis.X => point.x,
+            SweepAxis.Y => point.y,
+            _ => point.z
+        };
+        return new SweepEndpoint(value, bodyIndex, isMaximum);
+    }
+
+    private bool OverlapsOtherAxes(in Aabb left, in Aabb right) => ProjectionAxis switch
+    {
+        SweepAxis.X => Overlaps(left.Min.yz, left.Max.yz, right.Min.yz, right.Max.yz),
+        SweepAxis.Y => Overlaps(left.Min.xz, left.Max.xz, right.Min.xz, right.Max.xz),
+        _ => Overlaps(left.Min.xy, left.Max.xy, right.Min.xy, right.Max.xy)
+    };
+
+    private static bool Overlaps(float2 leftMin, float2 leftMax, float2 rightMin, float2 rightMax) =>
+        math.all(leftMax >= rightMin & leftMin <= rightMax);
+
+    private static SweepAxis SelectAxis(ReadOnlySpan<Aabb> bounds)
+    {
+        if (bounds.IsEmpty)
+        {
+            return SweepAxis.X;
+        }
+
+        var mean = float3.zero;
+        foreach (ref readonly var bound in bounds)
+        {
+            mean += bound.Center;
+        }
+        mean /= bounds.Length;
+
+        var variance = float3.zero;
+        foreach (ref readonly var bound in bounds)
+        {
+            var offset = bound.Center - mean;
+            variance += offset * offset;
+        }
+        return variance.x >= variance.y && variance.x >= variance.z
+            ? SweepAxis.X
+            : variance.y >= variance.z ? SweepAxis.Y : SweepAxis.Z;
+    }
 
     public void OnUninitialize(World world) => Dispose();
 
@@ -74,4 +134,3 @@ public sealed class SweepBroadphase : IAddon, IDisposable
         _active.Dispose();
     }
 }
-

@@ -21,5 +21,28 @@ public sealed class BroadphaseTests
         Assert.Single(pairs.ToArray());
         Assert.Equal(new BodyPair(0, 1), pairs[0]);
     }
-}
 
+    [Fact]
+    public void ReusesSortedEndpointsAcrossStableFrames()
+    {
+        using var world = new World();
+        var sphere = world.GetPhysicsShapes().Add(new SphereShape(0.5f));
+        for (var i = 0; i < 16; i++)
+        {
+            world.CreateStaticBody(
+                RigidTransform.Translate(new float3(0f, i * 2f, 0f)),
+                sphere);
+        }
+        using var stage = SystemChain.Empty
+            .Add<BroadphaseSystem>()
+            .Add<BuildPhysicsFrameSystem>()
+            .CreateStage(world);
+
+        stage.Tick();
+        stage.Tick();
+
+        var broadphase = world.GetAddon<SweepBroadphase>();
+        Assert.Equal(SweepAxis.Y, broadphase.ProjectionAxis);
+        Assert.Equal(0, broadphase.LastSortSwapCount);
+    }
+}

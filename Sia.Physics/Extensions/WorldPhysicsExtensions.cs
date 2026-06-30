@@ -74,4 +74,18 @@ public static class WorldPhysicsExtensions
             localAnchorA,
             localAnchorB,
             compliance)));
+
+    public static Entity CreateParticle(
+        this World world,
+        float3 position,
+        float inverseMass,
+        float radius,
+        ParticleVelocity velocity = default,
+        ParticleDamping? damping = null,
+        ParticleGravityScale? gravityScale = null) => world.CreateUnmanaged(HList.From(
+            new ParticlePosition(position),
+            velocity,
+            new PhysicsParticle(inverseMass, radius),
+            damping ?? ParticleDamping.Default,
+            gravityScale ?? ParticleGravityScale.Default));
 }

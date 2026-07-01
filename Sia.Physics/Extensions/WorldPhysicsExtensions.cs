@@ -88,4 +88,15 @@ public static class WorldPhysicsExtensions
             new PhysicsParticle(inverseMass, radius),
             damping ?? ParticleDamping.Default,
             gravityScale ?? ParticleGravityScale.Default));
+
+    public static Entity CreateParticleDistanceConstraint(
+        this World world,
+        Entity first,
+        Entity second,
+        float restLength,
+        float compliance = 0f) => world.CreateUnmanaged(HList.From(new ParticleDistanceConstraint(
+            first.Id,
+            second.Id,
+            restLength,
+            compliance)));
 }

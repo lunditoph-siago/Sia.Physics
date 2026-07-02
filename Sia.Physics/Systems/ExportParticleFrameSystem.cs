@@ -2,6 +2,7 @@ namespace Sia.Physics;
 
 [SiaSystem]
 [SiaAfter<SolveParticlesSystem>]
+[SiaAfter<SolveParticleCollisionsSystem>]
 public sealed class ExportParticleFrameSystem : SystemBase
 {
     private PhysicsConfiguration _configuration = null!;
@@ -31,4 +32,3 @@ public sealed class ExportParticleFrameSystem : SystemBase
         }
     }
 }
-

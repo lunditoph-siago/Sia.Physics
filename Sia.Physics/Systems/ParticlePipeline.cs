@@ -7,6 +7,6 @@ public static class ParticlePipeline
         .Add<BuildParticleFrameSystem>()
         .Add<BuildParticleConstraintsSystem>()
         .Add<SolveParticlesSystem>()
+        .Add<SolveParticleCollisionsSystem>()
         .Add<ExportParticleFrameSystem>();
 }
-

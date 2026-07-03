@@ -8,6 +8,7 @@ public static class PhysicsPipeline
         .Add<BuildDistanceJointsSystem>()
         .Add<BroadphaseSystem>()
         .Add<NarrowphaseSystem>()
+        .Add<DispatchContactsSystem>()
         .Add<SolveContactsSystem>()
         .Add<SolveDistanceJointsSystem>()
         .Add<ExportPhysicsFrameSystem>();

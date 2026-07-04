@@ -3,5 +3,5 @@
     <Project Path="Sia.Physics.Tests/Sia.Physics.Tests.csproj" />
   </Folder>
   <Project Path="Sia.Physics/Sia.Physics.csproj" />
+  <Project Path="Sia.Physics.Benchmarks/Sia.Physics.Benchmarks.csproj" />
 </Solution>
-

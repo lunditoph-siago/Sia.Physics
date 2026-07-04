@@ -71,6 +71,14 @@ public sealed class PhysicsFrame : IAddon, IDisposable
         return false;
     }
 
+    internal void MarkContinuous(int bodyIndex, in RigidTransform previousPose, in Aabb sweptBounds)
+    {
+        ref var body = ref _bodies[bodyIndex];
+        body.PreviousPose = previousPose;
+        body.IsContinuous = true;
+        _bounds[bodyIndex] = sweptBounds;
+    }
+
     public void OnUninitialize(World world) => Dispose();
 
     public void Dispose()

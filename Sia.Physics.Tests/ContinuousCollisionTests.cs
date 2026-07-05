@@ -18,6 +18,7 @@ public sealed class ContinuousCollisionTests
             damping: new PhysicsDamping(0f, 0f));
         using var stage = SystemChain.Empty
             .Add<BuildPhysicsFrameSystem>()
+            .Add<ApplyContinuousBoundsSystem>()
             .Add<IntegratePhysicsSystem>()
             .CreateStage(world);
 

@@ -2,6 +2,7 @@ namespace Sia.Physics;
 
 [SiaSystem]
 [SiaAfter<BuildPhysicsFrameSystem>]
+[SiaAfter<ApplyContinuousBoundsSystem>]
 public sealed class BroadphaseSystem : SystemBase
 {
     private PhysicsFrame _frame = null!;
@@ -20,4 +21,3 @@ public sealed class BroadphaseSystem : SystemBase
     public override void Execute(WorldContext context, IEntityQuery query) =>
         _broadphase.Build(_frame);
 }
-

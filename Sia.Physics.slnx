@@ -2,6 +2,9 @@
   <Folder Name="/tests/">
     <Project Path="Sia.Physics.Tests/Sia.Physics.Tests.csproj" />
   </Folder>
+  <Folder Name="/examples/">
+    <Project Path="Sia.Physics.WebGPU.Example/Sia.Physics.WebGPU.Example.csproj" />
+  </Folder>
   <Project Path="Sia.Physics/Sia.Physics.csproj" />
   <Project Path="Sia.Physics.Benchmarks/Sia.Physics.Benchmarks.csproj" />
 </Solution>

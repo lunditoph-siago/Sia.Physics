@@ -4,6 +4,10 @@ public readonly record struct PhysicsRay
 {
     public PhysicsRay(float3 origin, float3 direction, float maximumDistance = float.PositiveInfinity)
     {
+        if (!math.all(math.isfinite(origin)))
+        {
+            throw new ArgumentException("Origin must be finite.", nameof(origin));
+        }
         if (!float.IsFinite(direction.x) || !float.IsFinite(direction.y) || !float.IsFinite(direction.z))
         {
             throw new ArgumentException("Direction must be finite.", nameof(direction));
@@ -15,7 +19,10 @@ public readonly record struct PhysicsRay
             throw new ArgumentException("Direction must be non-zero.", nameof(direction));
         }
 
-        ArgumentOutOfRangeException.ThrowIfNegative(maximumDistance);
+        if (float.IsNaN(maximumDistance) || maximumDistance < 0f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumDistance));
+        }
         Origin = origin;
         Direction = direction * math.rsqrt(lengthSquared);
         MaximumDistance = maximumDistance;
@@ -29,4 +36,3 @@ public readonly record struct PhysicsRay
 
     public float3 GetPoint(float distance) => Origin + Direction * distance;
 }
-

@@ -10,10 +10,8 @@ internal sealed partial class ExhibitionScene
         var region = ExhibitionRegion.Particles;
         var center = GetCenter(region);
         var particles = new global::Sia.Entity[width * height];
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
                 var index = y * width + x;
                 var position = center + new float3(
                     (x - (width - 1) * 0.5f) * spacing,
@@ -35,21 +33,16 @@ internal sealed partial class ExhibitionScene
             }
         }
 
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
                 var index = y * width + x;
-                if (x + 1 < width)
-                {
+                if (x + 1 < width) {
                     AddParticleLink(region, particles[index], particles[index + 1], spacing, 0.000004f);
                 }
-                if (y + 1 < height)
-                {
+                if (y + 1 < height) {
                     AddParticleLink(region, particles[index], particles[index + width], spacing, 0.000004f);
                 }
-                if (x + 1 < width && y + 1 < height)
-                {
+                if (x + 1 < width && y + 1 < height) {
                     AddParticleLink(
                         region,
                         particles[index],
@@ -57,8 +50,7 @@ internal sealed partial class ExhibitionScene
                         spacing * math.sqrt(2f),
                         0.00002f);
                 }
-                if (x > 0 && y + 1 < height)
-                {
+                if (x > 0 && y + 1 < height) {
                     AddParticleLink(
                         region,
                         particles[index],
@@ -98,8 +90,7 @@ internal sealed partial class ExhibitionScene
 
     private void AddParticleGeometry(DebugMeshBuilder builder)
     {
-        foreach (var particle in _renderParticles.Values)
-        {
+        foreach (var particle in _renderParticles.Values) {
             var position = particle.Entity.Get<ParticlePosition>().Value;
             builder.AddSphere(
                 RigidTransform.Translate(position),
@@ -109,8 +100,7 @@ internal sealed partial class ExhibitionScene
                 latitudeSegments: 4);
         }
 
-        foreach (var link in _particleLinks)
-        {
+        foreach (var link in _particleLinks) {
             var first = link.First.Get<ParticlePosition>().Value;
             var second = link.Second.Get<ParticlePosition>().Value;
             builder.AddLine(first, second, 0.018f, DebugPalette.Particles);

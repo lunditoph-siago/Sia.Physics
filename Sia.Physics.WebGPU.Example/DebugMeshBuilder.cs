@@ -40,8 +40,7 @@ internal sealed class DebugMeshBuilder
     {
         var cross = math.cross(b - a, c - a);
         var lengthSquared = math.lengthsq(cross);
-        if (!(lengthSquared > 1e-12f) || !math.isfinite(lengthSquared))
-        {
+        if (!(lengthSquared > 1e-12f) || !math.isfinite(lengthSquared)) {
             return;
         }
 
@@ -79,8 +78,7 @@ internal sealed class DebugMeshBuilder
             new(0, 4, 7), new(0, 7, 3),
             new(1, 2, 6), new(1, 6, 5),
         };
-        foreach (ref readonly var triangle in triangles)
-        {
+        foreach (ref readonly var triangle in triangles) {
             AddTriangle(
                 math.transform(transform, vertices[triangle.x]),
                 math.transform(transform, vertices[triangle.y]),
@@ -98,28 +96,24 @@ internal sealed class DebugMeshBuilder
     {
         longitudeSegments = System.Math.Max(longitudeSegments, 6);
         latitudeSegments = System.Math.Max(latitudeSegments, 4);
-        for (var latitude = 0; latitude < latitudeSegments; latitude++)
-        {
+        for (var latitude = 0; latitude < latitudeSegments; latitude++) {
             var phi0 = -math.PI * 0.5f + (float)latitude / latitudeSegments * math.PI;
             var phi1 = -math.PI * 0.5f + (float)(latitude + 1) / latitudeSegments * math.PI;
-            for (var longitude = 0; longitude < longitudeSegments; longitude++)
-            {
+            for (var longitude = 0; longitude < longitudeSegments; longitude++) {
                 var theta0 = longitude * 2f * math.PI / longitudeSegments;
                 var theta1 = (longitude + 1) * 2f * math.PI / longitudeSegments;
                 var a = SpherePoint(phi0, theta0) * radius;
                 var b = SpherePoint(phi0, theta1) * radius;
                 var c = SpherePoint(phi1, theta1) * radius;
                 var d = SpherePoint(phi1, theta0) * radius;
-                if (latitude > 0)
-                {
+                if (latitude > 0) {
                     AddTriangle(
                         math.transform(transform, a),
                         math.transform(transform, c),
                         math.transform(transform, b),
                         color);
                 }
-                if (latitude + 1 < latitudeSegments)
-                {
+                if (latitude + 1 < latitudeSegments) {
                     AddTriangle(
                         math.transform(transform, a),
                         math.transform(transform, d),
@@ -158,8 +152,7 @@ internal sealed class DebugMeshBuilder
     {
         var axis = second - first;
         var lengthSquared = math.lengthsq(axis);
-        if (!(lengthSquared > 1e-12f))
-        {
+        if (!(lengthSquared > 1e-12f)) {
             return;
         }
 
@@ -169,8 +162,7 @@ internal sealed class DebugMeshBuilder
             : new float3(1f, 0f, 0f);
         var tangent = math.normalize(math.cross(direction, reference));
         var bitangent = math.cross(direction, tangent);
-        for (var side = 0; side < sideCount; side++)
-        {
+        for (var side = 0; side < sideCount; side++) {
             var angle0 = side * 2f * math.PI / sideCount;
             var angle1 = (side + 1) * 2f * math.PI / sideCount;
             var offset0 = (tangent * math.cos(angle0) + bitangent * math.sin(angle0)) * radius;

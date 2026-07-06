@@ -4,7 +4,7 @@ namespace Sia.Physics.WebGPU.Example;
 
 internal sealed partial class ExhibitionScene : IDisposable
 {
-    private const float _fixedDeltaTime = 1f / 60f;
+    private const float k_FixedDeltaTime = 1f / 60f;
 
     private readonly Dictionary<DemoShape, ShapeHandle> _shapeHandles = [];
     private readonly Dictionary<global::Sia.EntityId, RenderableBody> _renderBodies = [];
@@ -27,12 +27,11 @@ internal sealed partial class ExhibitionScene : IDisposable
         World = new global::Sia.World();
         Shapes = World.GetPhysicsShapes();
         var configuration = World.GetPhysicsConfiguration();
-        configuration.FixedDeltaTime = _fixedDeltaTime;
+        configuration.FixedDeltaTime = k_FixedDeltaTime;
         configuration.Gravity = new float3(0f, -9.81f, 0f);
         configuration.SolverIterations = 10;
 
-        foreach (var region in Enum.GetValues<ExhibitionRegion>())
-        {
+        foreach (var region in Enum.GetValues<ExhibitionRegion>()) {
             _regionEntities.Add(region, []);
             BuildRegion(region);
         }
@@ -64,15 +63,13 @@ internal sealed partial class ExhibitionScene : IDisposable
         _rayDisplayTime = System.Math.Max(0f, _rayDisplayTime - clampedDelta);
         _accumulator += clampedDelta;
         var stepCount = 0;
-        while (_accumulator >= _fixedDeltaTime && stepCount < 6)
-        {
+        while (_accumulator >= k_FixedDeltaTime && stepCount < 6) {
             StepFixed();
-            _accumulator -= _fixedDeltaTime;
+            _accumulator -= k_FixedDeltaTime;
             stepCount++;
         }
 
-        if (stepCount == 6)
-        {
+        if (stepCount == 6) {
             _accumulator = 0;
         }
     }
@@ -92,8 +89,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         _rayEnd = ray.GetPoint(collector.HasHit ? collector.Hit.Distance : maximumDistance);
         _rayHit = collector.HasHit ? collector.Hit.Position : null;
         _rayDisplayTime = 1.25f;
-        if (!collector.HasHit || !_bodyRegions.TryGetValue(collector.Hit.Entity.Id, out var region))
-        {
+        if (!collector.HasHit || !_bodyRegions.TryGetValue(collector.Hit.Entity.Id, out var region)) {
             return false;
         }
 
@@ -104,8 +100,7 @@ internal sealed partial class ExhibitionScene : IDisposable
 
     public void ResetAll()
     {
-        foreach (var region in Enum.GetValues<ExhibitionRegion>())
-        {
+        foreach (var region in Enum.GetValues<ExhibitionRegion>()) {
             ResetRegion(region, tickAfterReset: false);
         }
         _physicsStage.Tick();
@@ -115,26 +110,21 @@ internal sealed partial class ExhibitionScene : IDisposable
 
     public void ValidateState()
     {
-        foreach (var body in _renderBodies.Values)
-        {
+        foreach (var body in _renderBodies.Values) {
             var pose = body.Entity.Get<RigidTransform>();
-            if (!math.all(math.isfinite(pose.Translation)) || !math.isfinite(pose.Rotation))
-            {
+            if (!math.all(math.isfinite(pose.Translation)) || !math.isfinite(pose.Rotation)) {
                 throw new InvalidOperationException($"Body {body.Entity} has a non-finite pose.");
             }
         }
-        foreach (var particle in _renderParticles.Values)
-        {
+        foreach (var particle in _renderParticles.Values) {
             var position = particle.Entity.Get<ParticlePosition>().Value;
-            if (!math.all(math.isfinite(position)))
-            {
+            if (!math.all(math.isfinite(position))) {
                 throw new InvalidOperationException($"Particle {particle.Entity} has a non-finite position.");
             }
         }
     }
 
-    public static float3 GetCenter(ExhibitionRegion region) => region switch
-    {
+    public static float3 GetCenter(ExhibitionRegion region) => region switch {
         ExhibitionRegion.Stack => new float3(-15f, 0f, -12f),
         ExhibitionRegion.Shapes => new float3(0f, 0f, -12f),
         ExhibitionRegion.Continuous => new float3(15f, 0f, -12f),
@@ -144,8 +134,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         _ => throw new ArgumentOutOfRangeException(nameof(region)),
     };
 
-    public static string GetName(ExhibitionRegion region) => region switch
-    {
+    public static string GetName(ExhibitionRegion region) => region switch {
         ExhibitionRegion.Stack => "stack stability",
         ExhibitionRegion.Shapes => "mixed shapes",
         ExhibitionRegion.Continuous => "continuous collision",
@@ -155,8 +144,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         _ => throw new ArgumentOutOfRangeException(nameof(region)),
     };
 
-    public static Vector4 GetColor(ExhibitionRegion region) => region switch
-    {
+    public static Vector4 GetColor(ExhibitionRegion region) => region switch {
         ExhibitionRegion.Stack => DebugPalette.Stack,
         ExhibitionRegion.Shapes => DebugPalette.Shapes,
         ExhibitionRegion.Continuous => DebugPalette.Continuous,
@@ -168,8 +156,7 @@ internal sealed partial class ExhibitionScene : IDisposable
 
     public void Dispose()
     {
-        if (_disposed)
-        {
+        if (_disposed) {
             return;
         }
         _disposed = true;
@@ -181,8 +168,7 @@ internal sealed partial class ExhibitionScene : IDisposable
     private void ResetRegion(ExhibitionRegion region, bool tickAfterReset = true)
     {
         var entities = _regionEntities[region];
-        foreach (var entity in entities)
-        {
+        foreach (var entity in entities) {
             _renderBodies.Remove(entity.Id);
             _renderParticles.Remove(entity.Id);
             _bodyRegions.Remove(entity.Id);
@@ -191,8 +177,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         _particleLinks.RemoveAll(link => link.Region == region);
         entities.Clear();
         BuildRegion(region);
-        if (tickAfterReset)
-        {
+        if (tickAfterReset) {
             _physicsStage.Tick();
             _particleStage.Tick();
         }
@@ -243,13 +228,11 @@ internal sealed partial class ExhibitionScene : IDisposable
 
     private ShapeHandle GetShapeHandle(DemoShape shape)
     {
-        if (_shapeHandles.TryGetValue(shape, out var handle))
-        {
+        if (_shapeHandles.TryGetValue(shape, out var handle)) {
             return handle;
         }
 
-        handle = shape.Kind switch
-        {
+        handle = shape.Kind switch {
             DemoShapeKind.Sphere => Shapes.Add(new SphereShape(shape.Size.x)),
             DemoShapeKind.Box => Shapes.Add(new BoxShape(shape.Size)),
             DemoShapeKind.Capsule => Shapes.Add(new CapsuleShape(shape.Size.x, shape.Size.y)),

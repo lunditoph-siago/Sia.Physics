@@ -5,11 +5,9 @@ internal sealed partial class ExhibitionScene
     public void BuildDebugMesh(DebugMeshBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        foreach (var renderBody in _renderBodies.Values)
-        {
+        foreach (var renderBody in _renderBodies.Values) {
             var pose = renderBody.Entity.Get<RigidTransform>();
-            switch (renderBody.Shape.Kind)
-            {
+            switch (renderBody.Shape.Kind) {
                 case DemoShapeKind.Sphere:
                     builder.AddSphere(pose, renderBody.Shape.Size.x, renderBody.Color);
                     break;
@@ -29,19 +27,16 @@ internal sealed partial class ExhibitionScene
         }
 
         var frame = World.GetAddon<PhysicsFrame>();
-        foreach (ref readonly var contact in frame.Contacts)
-        {
+        foreach (ref readonly var contact in frame.Contacts) {
             builder.AddMarker(contact.Point, 0.09f, DebugPalette.Contact);
         }
 
         AddParticleGeometry(builder);
         AddRegionGuides(builder);
         AddQuerySweep(builder);
-        if (_rayDisplayTime > 0f)
-        {
+        if (_rayDisplayTime > 0f) {
             builder.AddLine(_rayStart, _rayEnd, 0.035f, DebugPalette.Ray);
-            if (_rayHit is { } hit)
-            {
+            if (_rayHit is { } hit) {
                 builder.AddMarker(hit, 0.18f, DebugPalette.Contact);
             }
         }
@@ -49,8 +44,7 @@ internal sealed partial class ExhibitionScene
 
     private static void AddRegionGuides(DebugMeshBuilder builder)
     {
-        foreach (var region in Enum.GetValues<ExhibitionRegion>())
-        {
+        foreach (var region in Enum.GetValues<ExhibitionRegion>()) {
             var center = GetCenter(region);
             var color = GetColor(region);
             const float half = 6.65f;
@@ -73,8 +67,7 @@ internal sealed partial class ExhibitionScene
         PhysicsQueries.Raycast(World.GetAddon<PhysicsFrame>(), Shapes, ray, ref collector);
         var end = ray.GetPoint(collector.HasHit ? collector.Hit.Distance : 13f);
         builder.AddLine(start, end, 0.025f, DebugPalette.Queries);
-        if (collector.HasHit)
-        {
+        if (collector.HasHit) {
             builder.AddMarker(collector.Hit.Position, 0.13f, DebugPalette.Contact);
         }
     }

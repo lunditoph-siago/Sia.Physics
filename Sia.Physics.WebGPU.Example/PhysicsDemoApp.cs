@@ -10,10 +10,10 @@ namespace Sia.Physics.WebGPU.Example;
 
 internal sealed unsafe class PhysicsDemoApp : IDisposable
 {
-    private const int _initialWidth = 1280;
-    private const int _initialHeight = 800;
-    private const ulong _uniformSize = 80;
-    private const WGPUTextureFormat _depthFormat = WGPUTextureFormat.Depth24Plus;
+    private const int k_InitialWidth = 1280;
+    private const int k_InitialHeight = 800;
+    private const ulong k_UniformSize = 80;
+    private const WGPUTextureFormat k_DepthFormat = WGPUTextureFormat.Depth24Plus;
 
     private readonly HashSet<Key> _pressedKeys = [];
     private readonly HashSet<MouseButton> _pressedMouseButtons = [];
@@ -110,8 +110,8 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
         _glfwInitialized = true;
         _window = Glfw.CreateWindow(
             new WindowDescriptor(
-                _initialWidth,
-                _initialHeight,
+                k_InitialWidth,
+                k_InitialHeight,
                 "Sia.Physics · WebGPU Exhibition",
                 Visible: _windowVisible,
                 Resizable: true),
@@ -250,7 +250,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
             NextInChain = null,
             Label = default,
             Usage = WGPUBufferUsage.Uniform | WGPUBufferUsage.CopyDst,
-            Size = _uniformSize,
+            Size = k_UniformSize,
             MappedAtCreation = 0,
         };
         _uniformBuffer = Wgpu.CreateBuffer(_device, in bufferDescriptor);
@@ -264,7 +264,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
                 NextInChain = null,
                 Type = WGPUBufferBindingType.Uniform,
                 HasDynamicOffset = 0,
-                MinBindingSize = _uniformSize,
+                MinBindingSize = k_UniformSize,
             },
             Sampler = default,
             Texture = default,
@@ -283,7 +283,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
             Binding = 0,
             Buffer = Pointer(_uniformBuffer),
             Offset = 0,
-            Size = _uniformSize,
+            Size = k_UniformSize,
             Sampler = null,
             TextureView = null,
         };
@@ -366,7 +366,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
             };
             var depthStencil = new WGPUDepthStencilState {
                 NextInChain = null,
-                Format = _depthFormat,
+                Format = k_DepthFormat,
                 DepthWriteEnabled = WGPUOptionalBool.True,
                 DepthCompare = WGPUCompareFunction.Less,
                 StencilFront = stencil,
@@ -459,7 +459,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
                 Height = (uint)_framebufferHeight,
                 DepthOrArrayLayers = 1,
             },
-            Format = _depthFormat,
+            Format = k_DepthFormat,
             MipLevelCount = 1,
             SampleCount = 1,
             ViewFormatCount = 0,
@@ -469,7 +469,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
         var viewDescriptor = new WGPUTextureViewDescriptor {
             NextInChain = null,
             Label = default,
-            Format = _depthFormat,
+            Format = k_DepthFormat,
             Dimension = WGPUTextureViewDimension._2D,
             BaseMipLevel = 0,
             MipLevelCount = 1,

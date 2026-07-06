@@ -5,8 +5,7 @@ internal sealed partial class ExhibitionScene
     private void BuildRegion(ExhibitionRegion region)
     {
         AddPlatform(region);
-        switch (region)
-        {
+        switch (region) {
             case ExhibitionRegion.Stack:
                 BuildStackRegion();
                 break;
@@ -52,11 +51,9 @@ internal sealed partial class ExhibitionScene
         var center = GetCenter(region);
         var shape = DemoShape.Box(new float3(0.48f, 0.42f, 0.48f));
         const int levels = 8;
-        for (var level = 0; level < levels; level++)
-        {
+        for (var level = 0; level < levels; level++) {
             var count = levels - level;
-            for (var index = 0; index < count; index++)
-            {
+            for (var index = 0; index < count; index++) {
                 var position = center + new float3(
                     (index - (count - 1) * 0.5f) * 1.02f,
                     0.44f + level * 0.86f,
@@ -81,8 +78,7 @@ internal sealed partial class ExhibitionScene
             DemoShape.Box(new float3(0.46f)),
             DemoShape.Capsule(0.32f, 0.55f),
         ];
-        for (var index = 0; index < 27; index++)
-        {
+        for (var index = 0; index < 27; index++) {
             var x = index % 3;
             var z = index / 3 % 3;
             var y = index / 9;
@@ -105,8 +101,7 @@ internal sealed partial class ExhibitionScene
         var center = GetCenter(region);
         var projectile = DemoShape.Sphere(0.28f);
         var target = DemoShape.Sphere(0.52f);
-        for (var lane = -3; lane <= 3; lane++)
-        {
+        for (var lane = -3; lane <= 3; lane++) {
             var z = lane * 1.45f;
             AddStatic(
                 region,
@@ -135,8 +130,7 @@ internal sealed partial class ExhibitionScene
             anchorShape,
             RigidTransform.Translate(center + new float3(0f, 7.2f, 0f)),
             DebugPalette.Static);
-        for (var index = 0; index < 8; index++)
-        {
+        for (var index = 0; index < 8; index++) {
             var current = AddDynamic(
                 region,
                 linkShape,
@@ -162,10 +156,8 @@ internal sealed partial class ExhibitionScene
     {
         var region = ExhibitionRegion.Queries;
         var center = GetCenter(region);
-        for (var z = -2; z <= 2; z++)
-        {
-            for (var x = -2; x <= 2; x++)
-            {
+        for (var z = -2; z <= 2; z++) {
+            for (var x = -2; x <= 2; x++) {
                 var shape = ((x + z) & 1) == 0
                     ? DemoShape.Sphere(0.48f)
                     : DemoShape.Box(new float3(0.43f));

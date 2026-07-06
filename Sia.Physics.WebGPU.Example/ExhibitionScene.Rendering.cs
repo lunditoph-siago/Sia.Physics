@@ -34,6 +34,7 @@ internal sealed partial class ExhibitionScene
             builder.AddMarker(contact.Point, 0.09f, DebugPalette.Contact);
         }
 
+        AddParticleGeometry(builder);
         AddRegionGuides(builder);
         AddQuerySweep(builder);
         if (_rayDisplayTime > 0f)

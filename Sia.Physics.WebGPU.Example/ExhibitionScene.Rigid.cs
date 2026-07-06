@@ -20,6 +20,7 @@ internal sealed partial class ExhibitionScene
                 BuildJointRegion();
                 break;
             case ExhibitionRegion.Particles:
+                BuildParticleRegion();
                 break;
             case ExhibitionRegion.Queries:
                 BuildQueryRegion();

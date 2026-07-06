@@ -8,9 +8,12 @@ internal sealed partial class ExhibitionScene : IDisposable
 
     private readonly Dictionary<DemoShape, ShapeHandle> _shapeHandles = [];
     private readonly Dictionary<global::Sia.EntityId, RenderableBody> _renderBodies = [];
+    private readonly Dictionary<global::Sia.EntityId, RenderableParticle> _renderParticles = [];
     private readonly Dictionary<global::Sia.EntityId, ExhibitionRegion> _bodyRegions = [];
     private readonly Dictionary<ExhibitionRegion, List<global::Sia.Entity>> _regionEntities = [];
+    private readonly List<ParticleLink> _particleLinks = [];
     private readonly global::Sia.SystemStage _physicsStage;
+    private readonly global::Sia.SystemStage _particleStage;
     private double _accumulator;
     private float _elapsedTime;
     private bool _disposed;
@@ -35,7 +38,9 @@ internal sealed partial class ExhibitionScene : IDisposable
         }
 
         _physicsStage = PhysicsPipeline.Default.CreateStage(World);
+        _particleStage = ParticlePipeline.Default.CreateStage(World);
         _physicsStage.Tick();
+        _particleStage.Tick();
     }
 
     public global::Sia.World World { get; }
@@ -43,6 +48,8 @@ internal sealed partial class ExhibitionScene : IDisposable
     public PhysicsShapes Shapes { get; }
 
     public int BodyCount => _renderBodies.Count;
+
+    public int ParticleCount => _renderParticles.Count;
 
     public int ContactCount => World.GetAddon<PhysicsFrame>().Contacts.Length;
 
@@ -70,7 +77,11 @@ internal sealed partial class ExhibitionScene : IDisposable
         }
     }
 
-    public void StepFixed() => _physicsStage.Tick();
+    public void StepFixed()
+    {
+        _physicsStage.Tick();
+        _particleStage.Tick();
+    }
 
     public bool RaycastReset(float3 origin, float3 direction, float maximumDistance = 120f)
     {
@@ -98,6 +109,7 @@ internal sealed partial class ExhibitionScene : IDisposable
             ResetRegion(region, tickAfterReset: false);
         }
         _physicsStage.Tick();
+        _particleStage.Tick();
         LastResetRegion = null;
     }
 
@@ -109,6 +121,14 @@ internal sealed partial class ExhibitionScene : IDisposable
             if (!math.all(math.isfinite(pose.Translation)) || !math.isfinite(pose.Rotation))
             {
                 throw new InvalidOperationException($"Body {body.Entity} has a non-finite pose.");
+            }
+        }
+        foreach (var particle in _renderParticles.Values)
+        {
+            var position = particle.Entity.Get<ParticlePosition>().Value;
+            if (!math.all(math.isfinite(position)))
+            {
+                throw new InvalidOperationException($"Particle {particle.Entity} has a non-finite position.");
             }
         }
     }
@@ -153,6 +173,7 @@ internal sealed partial class ExhibitionScene : IDisposable
             return;
         }
         _disposed = true;
+        _particleStage.Dispose();
         _physicsStage.Dispose();
         World.Dispose();
     }
@@ -163,14 +184,17 @@ internal sealed partial class ExhibitionScene : IDisposable
         foreach (var entity in entities)
         {
             _renderBodies.Remove(entity.Id);
+            _renderParticles.Remove(entity.Id);
             _bodyRegions.Remove(entity.Id);
             entity.Destroy();
         }
+        _particleLinks.RemoveAll(link => link.Region == region);
         entities.Clear();
         BuildRegion(region);
         if (tickAfterReset)
         {
             _physicsStage.Tick();
+            _particleStage.Tick();
         }
     }
 

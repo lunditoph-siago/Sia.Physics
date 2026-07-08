@@ -10,6 +10,8 @@ public sealed class PhysicsFrame : IAddon, IDisposable
     private readonly NativeList<ContactConstraint> _constraints = new(256);
     private readonly NativeList<DistanceJointConstraint> _distanceJoints = new(64);
 
+    public PhysicsQueryIndex QueryIndex { get; } = new();
+
     public IReadOnlyList<Entity> Entities => _entities;
 
     public Span<BodyState> Bodies => _bodies.Span;
@@ -83,6 +85,7 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     public void Dispose()
     {
+        QueryIndex.Dispose();
         _bodies.Dispose();
         _bounds.Dispose();
         _pairs.Dispose();

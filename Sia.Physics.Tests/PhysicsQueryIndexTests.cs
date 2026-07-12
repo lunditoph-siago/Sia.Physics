@@ -3,6 +3,27 @@ namespace Sia.Physics.Tests;
 public sealed class PhysicsQueryIndexTests
 {
     [Fact]
+    public void EcsSystemBuildsIndexFromPackedFrame()
+    {
+        using var world = new World();
+        var sphere = world.GetPhysicsShapes().Add(new SphereShape(0.5f));
+        for (var i = 0; i < 17; i++)
+        {
+            world.CreateStaticBody(RigidTransform.Translate(new float3(i, 0f, 0f)), sphere);
+        }
+        using var stage = SystemChain.Empty
+            .Add<BuildPhysicsFrameSystem>()
+            .Add<BuildPhysicsQueryIndexSystem>()
+            .CreateStage(world);
+
+        stage.Tick();
+
+        var frame = world.GetAddon<PhysicsFrame>();
+        Assert.Equal(frame.Bodies.Length, frame.QueryIndex.BodyCount);
+        Assert.NotEqual(0, frame.QueryIndex.NodeCount);
+    }
+
+    [Fact]
     public void BvhBuildsCompactLeavesAndRefitsStableBodies()
     {
         using var index = new PhysicsQueryIndex();

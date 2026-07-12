@@ -12,6 +12,8 @@ public sealed partial class PhysicsQueryIndex : IDisposable
 
     public int NodeCount => _nodes.Count;
 
+    internal void Build(PhysicsFrame frame) => BuildBvh(frame.Bounds);
+
     public void Dispose()
     {
         _nodeBounds.Dispose();

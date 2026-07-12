@@ -6,6 +6,7 @@ public static class PhysicsPipeline
         .Add<IntegratePhysicsSystem>()
         .Add<BuildPhysicsFrameSystem>()
         .Add<ApplyContinuousBoundsSystem>()
+        .Add<BuildPhysicsQueryIndexSystem>()
         .Add<BuildDistanceJointsSystem>()
         .Add<BroadphaseSystem>()
         .Add<NarrowphaseSystem>()

@@ -7,12 +7,21 @@ public sealed partial class PhysicsQueryIndex : IDisposable
     private readonly NativeList<int> _bodyIndices = new(256);
     private readonly NativeList<int> _minimumOrder = new(256);
     private readonly NativeList<int> _maximumOrder = new(256);
+    private bool _isCurrent;
 
     public int BodyCount => _bodyIndices.Count;
 
     public int NodeCount => _nodes.Count;
 
-    internal void Build(PhysicsFrame frame) => BuildBvh(frame.Bounds);
+    internal bool IsCurrentFor(int bodyCount) => _isCurrent && BodyCount == bodyCount;
+
+    internal void Invalidate() => _isCurrent = false;
+
+    internal void Build(PhysicsFrame frame)
+    {
+        BuildBvh(frame.Bounds);
+        _isCurrent = true;
+    }
 
     public void Dispose()
     {

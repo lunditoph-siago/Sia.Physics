@@ -93,7 +93,7 @@ public sealed partial class PhysicsQueryIndex
         var leftCount = axisExtent > 1e-6f
             ? PartitionBySah(bounds, start, count, axis, axisMinimum, axisExtent)
             : count / 2;
-        if (leftCount == 0 || leftCount == count)
+        if (leftCount < count / 4 || leftCount > count - count / 4)
         {
             leftCount = count / 2;
         }

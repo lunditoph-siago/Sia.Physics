@@ -10,7 +10,10 @@ public sealed class PhysicsQueryTests
         var sphere = shapes.Add(new SphereShape(1f));
         var near = world.CreateStaticBody(RigidTransform.Translate(new float3(3f, 0f, 0f)), sphere);
         world.CreateStaticBody(RigidTransform.Translate(new float3(7f, 0f, 0f)), sphere);
-        using var stage = SystemChain.Empty.Add<BuildPhysicsFrameSystem>().CreateStage(world);
+        using var stage = SystemChain.Empty
+            .Add<BuildPhysicsFrameSystem>()
+            .Add<BuildPhysicsQueryIndexSystem>()
+            .CreateStage(world);
         stage.Tick();
 
         var collector = new ClosestHitCollector(10f);

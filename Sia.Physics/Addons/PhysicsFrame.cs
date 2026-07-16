@@ -28,6 +28,7 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     internal void BeginBuild()
     {
+        QueryIndex.Invalidate();
         _entities.Clear();
         _bodies.Clear();
         _bounds.Clear();

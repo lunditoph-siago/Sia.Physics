@@ -20,6 +20,7 @@ public sealed partial class PhysicsQueryIndex : IDisposable
     internal void Build(PhysicsFrame frame)
     {
         BuildBvh(frame.Bounds);
+        BuildSweep(frame.Bounds);
         _isCurrent = true;
     }
 

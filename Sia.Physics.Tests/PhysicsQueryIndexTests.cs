@@ -50,4 +50,36 @@ public sealed class PhysicsQueryIndexTests
         Assert.Equal(1, index.BvhRebuildCount);
         Assert.True(index.NodeBounds[0].Contains(bounds[0]));
     }
+
+    [Fact]
+    public void SweepIndexKeepsBothBoundaryOrdersCoherent()
+    {
+        using var index = new PhysicsQueryIndex();
+        var bounds = new Aabb[24];
+        for (var i = 0; i < bounds.Length; i++)
+        {
+            var center = new float3((i * 7) % bounds.Length, 0f, 0f);
+            bounds[i] = Aabb.CreateFromCenterAndHalfExtents(center, new float3(i % 3 + 0.25f));
+        }
+
+        index.BuildSweep(bounds);
+
+        Assert.Equal(SweepAxis.X, index.ProjectionAxis);
+        AssertSorted(index.MinimumOrder, bounds, maximum: false);
+        AssertSorted(index.MaximumOrder, bounds, maximum: true);
+
+        index.BuildSweep(bounds);
+
+        Assert.Equal(0, index.SweepSortSwapCount);
+    }
+
+    private static void AssertSorted(ReadOnlySpan<int> order, ReadOnlySpan<Aabb> bounds, bool maximum)
+    {
+        for (var i = 1; i < order.Length; i++)
+        {
+            var previous = maximum ? bounds[order[i - 1]].Max.x : bounds[order[i - 1]].Min.x;
+            var current = maximum ? bounds[order[i]].Max.x : bounds[order[i]].Min.x;
+            Assert.True(previous <= current);
+        }
+    }
 }

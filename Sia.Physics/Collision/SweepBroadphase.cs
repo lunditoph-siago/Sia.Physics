@@ -101,7 +101,7 @@ public sealed class SweepBroadphase : IAddon, IDisposable
     private static bool Overlaps(float2 leftMin, float2 leftMax, float2 rightMin, float2 rightMax) =>
         math.all(leftMax >= rightMin & leftMin <= rightMax);
 
-    private static SweepAxis SelectAxis(ReadOnlySpan<Aabb> bounds)
+    internal static SweepAxis SelectAxis(ReadOnlySpan<Aabb> bounds)
     {
         if (bounds.IsEmpty)
         {

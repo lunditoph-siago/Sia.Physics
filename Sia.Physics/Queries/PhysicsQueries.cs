@@ -148,21 +148,68 @@ public static class PhysicsQueries
         ref TCollector collector)
         where TCollector : struct, IOverlapCollector
     {
-        var bodies = frame.Bodies;
+        var index = frame.QueryIndex;
         var bodyBounds = frame.Bounds;
-        for (var i = 0; i < bodies.Length; i++)
+        if (!index.IsCurrentFor(bodyBounds.Length) || bodyBounds.IsEmpty)
         {
-            if (!filter.Allows(bodies[i].Collider) || !bounds.Overlaps(bodyBounds[i]))
-            {
-                continue;
-            }
+            OverlapAabbLinear(frame, bounds, filter, ref collector);
+            return;
+        }
 
-            var hit = new OverlapHit(frame.Entities[i], i);
-            if (!collector.AddHit(hit))
+        var queryMinimum = PhysicsQueryIndex.GetSweepValue(bounds.Min, index.ProjectionAxis);
+        var queryMaximum = PhysicsQueryIndex.GetSweepValue(bounds.Max, index.ProjectionAxis);
+        var minimumCount = index.UpperBoundMinimum(bodyBounds, queryMaximum);
+        var maximumStart = index.LowerBoundMaximum(bodyBounds, queryMinimum);
+        var maximumCount = bodyBounds.Length - maximumStart;
+        var order = minimumCount <= maximumCount ? index.MinimumOrder : index.MaximumOrder;
+        var start = minimumCount <= maximumCount ? 0 : maximumStart;
+        var count = System.Math.Min(minimumCount, maximumCount);
+        for (var i = 0; i < count; i++)
+        {
+            var bodyIndex = order[start + i];
+            if (!OverlapBody(frame, bounds, filter, bodyIndex, ref collector))
             {
                 return;
             }
         }
+    }
+
+    private static void OverlapAabbLinear<TCollector>(
+        PhysicsFrame frame,
+        in Aabb bounds,
+        in PhysicsQueryFilter filter,
+        ref TCollector collector)
+        where TCollector : struct, IOverlapCollector
+    {
+        var bodyBounds = frame.Bounds;
+        for (var i = 0; i < bodyBounds.Length; i++)
+        {
+            if (!bounds.Overlaps(bodyBounds[i]))
+            {
+                continue;
+            }
+
+            if (!OverlapBody(frame, bounds, filter, i, ref collector))
+            {
+                return;
+            }
+        }
+    }
+
+    private static bool OverlapBody<TCollector>(
+        PhysicsFrame frame,
+        in Aabb bounds,
+        in PhysicsQueryFilter filter,
+        int bodyIndex,
+        ref TCollector collector)
+        where TCollector : struct, IOverlapCollector
+    {
+        if (!filter.Allows(frame.Bodies[bodyIndex].Collider) || !bounds.Overlaps(frame.Bounds[bodyIndex]))
+        {
+            return true;
+        }
+
+        return collector.AddHit(new OverlapHit(frame.Entities[bodyIndex], bodyIndex));
     }
 
     private readonly record struct BvhTraversalEntry(int NodeIndex, float Distance);

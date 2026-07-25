@@ -2,93 +2,55 @@ namespace Sia.Physics;
 
 public sealed class SweepBroadphase : IAddon, IDisposable
 {
-    private readonly NativeList<SweepEndpoint> _endpoints = new(256);
-    private readonly NativeList<int> _active = new(64);
-
     internal SweepAxis ProjectionAxis { get; private set; }
 
     internal int LastSortSwapCount { get; private set; }
 
     public void Build(PhysicsFrame frame)
     {
-        _active.Clear();
         frame.ClearPairs();
-
+        var index = frame.QueryIndex;
+        if (!index.IsCurrentFor(frame.Bodies.Length))
+        {
+            index.Build(frame);
+        }
         var bounds = frame.Bounds;
-        ProjectionAxis = SelectAxis(bounds);
-        if (_endpoints.Count != bounds.Length * 2)
-        {
-            _endpoints.Clear();
-            for (var i = 0; i < bounds.Length; i++)
-            {
-                _endpoints.Add(CreateEndpoint(bounds[i], i, isMaximum: false));
-                _endpoints.Add(CreateEndpoint(bounds[i], i, isMaximum: true));
-            }
-            _endpoints.Span.Sort();
-            LastSortSwapCount = 0;
-        }
-        else
-        {
-            foreach (ref var endpoint in _endpoints.Span)
-            {
-                endpoint = CreateEndpoint(bounds[endpoint.BodyIndex], endpoint.BodyIndex, endpoint.IsMaximum);
-            }
-            LastSortSwapCount = SweepSort.InsertionSort(_endpoints.Span);
-        }
-
+        ProjectionAxis = index.ProjectionAxis;
+        LastSortSwapCount = index.SweepSortSwapCount;
         var bodies = frame.Bodies;
-        foreach (ref readonly var endpoint in _endpoints.ReadOnlySpan)
+        var order = index.MinimumOrder;
+        for (var orderIndex = 0; orderIndex < order.Length; orderIndex++)
         {
-            if (!endpoint.IsMaximum)
+            var candidateIndex = order[orderIndex];
+            ref readonly var candidateBounds = ref bounds[candidateIndex];
+            var candidateMaximum = PhysicsQueryIndex.GetSweepValue(candidateBounds.Max, ProjectionAxis);
+            for (var otherOrderIndex = orderIndex + 1; otherOrderIndex < order.Length; otherOrderIndex++)
             {
-                var candidateBounds = bounds[endpoint.BodyIndex];
-                for (var i = 0; i < _active.Count; i++)
+                var otherIndex = order[otherOrderIndex];
+                ref readonly var otherBounds = ref bounds[otherIndex];
+                if (PhysicsQueryIndex.GetSweepValue(otherBounds.Min, ProjectionAxis) > candidateMaximum)
                 {
-                    var other = _active[i];
-                    if (!OverlapsOtherAxes(candidateBounds, bounds[other]))
-                    {
-                        continue;
-                    }
-
-                    ref var candidateBody = ref bodies[endpoint.BodyIndex];
-                    ref var otherBody = ref bodies[other];
-                    if ((candidateBody.Body.MotionType == BodyMotionType.Static &&
-                         otherBody.Body.MotionType == BodyMotionType.Static) ||
-                        !CollisionFilter.Allows(candidateBody.Collider.Filter, otherBody.Collider.Filter))
-                    {
-                        continue;
-                    }
-
-                    var first = System.Math.Min(endpoint.BodyIndex, other);
-                    var second = System.Math.Max(endpoint.BodyIndex, other);
-                    frame.AddPair(new BodyPair(first, second));
+                    break;
                 }
-                _active.Add(endpoint.BodyIndex);
-            }
-            else
-            {
-                for (var i = 0; i < _active.Count; i++)
+                if (!OverlapsOtherAxes(candidateBounds, otherBounds))
                 {
-                    if (_active[i] == endpoint.BodyIndex)
-                    {
-                        _active.RemoveAtSwapBack(i);
-                        break;
-                    }
+                    continue;
                 }
+
+                ref var candidateBody = ref bodies[candidateIndex];
+                ref var otherBody = ref bodies[otherIndex];
+                if ((candidateBody.Body.MotionType == BodyMotionType.Static &&
+                     otherBody.Body.MotionType == BodyMotionType.Static) ||
+                    !CollisionFilter.Allows(candidateBody.Collider.Filter, otherBody.Collider.Filter))
+                {
+                    continue;
+                }
+
+                var first = System.Math.Min(candidateIndex, otherIndex);
+                var second = System.Math.Max(candidateIndex, otherIndex);
+                frame.AddPair(new BodyPair(first, second));
             }
         }
-    }
-
-    private SweepEndpoint CreateEndpoint(in Aabb bounds, int bodyIndex, bool isMaximum)
-    {
-        var point = isMaximum ? bounds.Max : bounds.Min;
-        var value = ProjectionAxis switch
-        {
-            SweepAxis.X => point.x,
-            SweepAxis.Y => point.y,
-            _ => point.z
-        };
-        return new SweepEndpoint(value, bodyIndex, isMaximum);
     }
 
     private bool OverlapsOtherAxes(in Aabb left, in Aabb right) => ProjectionAxis switch
@@ -130,7 +92,5 @@ public sealed class SweepBroadphase : IAddon, IDisposable
 
     public void Dispose()
     {
-        _endpoints.Dispose();
-        _active.Dispose();
     }
 }

@@ -4,9 +4,9 @@ namespace Sia.Physics;
 
 public sealed partial class PhysicsQueryIndex
 {
-    private const int BvhBinCount = 8;
-    private const int BvhLeafCapacity = 4;
-    private const float MaximumQualityGrowth = 1.45f;
+    private const int k_BvhBinCount = 8;
+    private const int k_BvhLeafCapacity = 4;
+    private const float k_MaximumQualityGrowth = 1.45f;
     private float _rebuildQuality;
 
     public float BvhQuality { get; private set; }
@@ -21,8 +21,7 @@ public sealed partial class PhysicsQueryIndex
 
     internal void BuildBvh(ReadOnlySpan<Aabb> bounds)
     {
-        if (bounds.IsEmpty)
-        {
+        if (bounds.IsEmpty) {
             _nodeBounds.Clear();
             _nodes.Clear();
             _bodyIndices.Clear();
@@ -31,16 +30,14 @@ public sealed partial class PhysicsQueryIndex
             return;
         }
 
-        if (_bodyIndices.Count != bounds.Length || _nodes.Count == 0)
-        {
+        if (_bodyIndices.Count != bounds.Length || _nodes.Count == 0) {
             RebuildBvh(bounds);
             return;
         }
 
         RefitBvh(bounds);
         BvhQuality = ComputeBvhQuality();
-        if (BvhQuality > _rebuildQuality * MaximumQualityGrowth)
-        {
+        if (BvhQuality > _rebuildQuality * k_MaximumQualityGrowth) {
             RebuildBvh(bounds);
         }
     }
@@ -51,8 +48,7 @@ public sealed partial class PhysicsQueryIndex
         _nodes.Clear();
         _bodyIndices.Clear();
         _bodyIndices.EnsureCapacity(bounds.Length);
-        for (var i = 0; i < bounds.Length; i++)
-        {
+        for (var i = 0; i < bounds.Length; i++) {
             _bodyIndices.Add(i);
         }
 
@@ -71,8 +67,7 @@ public sealed partial class PhysicsQueryIndex
         var nodeBounds = bounds[_bodyIndices[start]];
         var centroidMinimum = nodeBounds.Center;
         var centroidMaximum = centroidMinimum;
-        for (var i = 1; i < count; i++)
-        {
+        for (var i = 1; i < count; i++) {
             ref readonly var bodyBounds = ref bounds[_bodyIndices[start + i]];
             nodeBounds.Include(bodyBounds);
             centroidMinimum = math.min(centroidMinimum, bodyBounds.Center);
@@ -80,8 +75,7 @@ public sealed partial class PhysicsQueryIndex
         }
         _nodeBounds[nodeIndex] = nodeBounds;
 
-        if (count <= BvhLeafCapacity)
-        {
+        if (count <= k_BvhLeafCapacity) {
             _nodes[nodeIndex] = new BvhNode(start, count);
             return nodeIndex;
         }
@@ -93,8 +87,7 @@ public sealed partial class PhysicsQueryIndex
         var leftCount = axisExtent > 1e-6f
             ? PartitionBySah(bounds, start, count, axis, axisMinimum, axisExtent)
             : count / 2;
-        if (leftCount < count / 4 || leftCount > count - count / 4)
-        {
+        if (leftCount < count / 4 || leftCount > count - count / 4) {
             leftCount = count / 2;
         }
 
@@ -112,23 +105,21 @@ public sealed partial class PhysicsQueryIndex
         float axisMinimum,
         float axisExtent)
     {
-        Span<BvhBin> bins = stackalloc BvhBin[BvhBinCount];
-        var scale = BvhBinCount / axisExtent;
-        for (var i = 0; i < count; i++)
-        {
+        Span<BvhBin> bins = stackalloc BvhBin[k_BvhBinCount];
+        var scale = k_BvhBinCount / axisExtent;
+        for (var i = 0; i < count; i++) {
             ref readonly var bodyBounds = ref bounds[_bodyIndices[start + i]];
             var binIndex = System.Math.Min(
                 (int)((GetAxis(bodyBounds.Center, axis) - axisMinimum) * scale),
-                BvhBinCount - 1);
+                k_BvhBinCount - 1);
             bins[binIndex].Include(bodyBounds);
         }
 
-        Span<float> leftAreas = stackalloc float[BvhBinCount - 1];
-        Span<int> leftCounts = stackalloc int[BvhBinCount - 1];
+        Span<float> leftAreas = stackalloc float[k_BvhBinCount - 1];
+        Span<int> leftCounts = stackalloc int[k_BvhBinCount - 1];
         var leftBounds = default(Aabb);
         var leftCount = 0;
-        for (var i = 0; i < BvhBinCount - 1; i++)
-        {
+        for (var i = 0; i < k_BvhBinCount - 1; i++) {
             IncludeBin(ref leftBounds, ref leftCount, bins[i]);
             leftAreas[i] = leftBounds.SurfaceArea;
             leftCounts[i] = leftCount;
@@ -138,12 +129,10 @@ public sealed partial class PhysicsQueryIndex
         var bestSplit = 0;
         var rightBounds = default(Aabb);
         var rightCount = 0;
-        for (var i = BvhBinCount - 1; i > 0; i--)
-        {
+        for (var i = k_BvhBinCount - 1; i > 0; i--) {
             IncludeBin(ref rightBounds, ref rightCount, bins[i]);
             var cost = leftAreas[i - 1] * leftCounts[i - 1] + rightBounds.SurfaceArea * rightCount;
-            if (cost < bestCost)
-            {
+            if (cost < bestCost) {
                 bestCost = cost;
                 bestSplit = i - 1;
             }
@@ -151,18 +140,15 @@ public sealed partial class PhysicsQueryIndex
 
         var first = start;
         var last = start + count - 1;
-        while (first <= last)
-        {
+        while (first <= last) {
             ref readonly var bodyBounds = ref bounds[_bodyIndices[first]];
             var binIndex = System.Math.Min(
                 (int)((GetAxis(bodyBounds.Center, axis) - axisMinimum) * scale),
-                BvhBinCount - 1);
-            if (binIndex <= bestSplit)
-            {
+                k_BvhBinCount - 1);
+            if (binIndex <= bestSplit) {
                 first++;
             }
-            else
-            {
+            else {
                 (_bodyIndices[first], _bodyIndices[last]) = (_bodyIndices[last], _bodyIndices[first]);
                 last--;
             }
@@ -172,11 +158,9 @@ public sealed partial class PhysicsQueryIndex
 
     private void RefitBvh(ReadOnlySpan<Aabb> bounds)
     {
-        for (var nodeIndex = _nodes.Count - 1; nodeIndex >= 0; nodeIndex--)
-        {
+        for (var nodeIndex = _nodes.Count - 1; nodeIndex >= 0; nodeIndex--) {
             ref readonly var node = ref _nodes[nodeIndex];
-            if (!node.IsLeaf)
-            {
+            if (!node.IsLeaf) {
                 _nodeBounds[nodeIndex] = Aabb.Union(
                     _nodeBounds[nodeIndex + 1],
                     _nodeBounds[node.Index]);
@@ -184,8 +168,7 @@ public sealed partial class PhysicsQueryIndex
             }
 
             var leafBounds = bounds[_bodyIndices[node.Index]];
-            for (var i = 1; i < node.Count; i++)
-            {
+            for (var i = 1; i < node.Count; i++) {
                 leafBounds.Include(bounds[_bodyIndices[node.Index + i]]);
             }
             _nodeBounds[nodeIndex] = leafBounds;
@@ -195,14 +178,12 @@ public sealed partial class PhysicsQueryIndex
     private float ComputeBvhQuality()
     {
         var rootArea = _nodeBounds[0].SurfaceArea;
-        if (!(rootArea > 0f))
-        {
+        if (!(rootArea > 0f)) {
             return 1f;
         }
 
         var totalArea = 0f;
-        foreach (ref readonly var bounds in _nodeBounds.ReadOnlySpan)
-        {
+        foreach (ref readonly var bounds in _nodeBounds.ReadOnlySpan) {
             totalArea += bounds.SurfaceArea;
         }
         return totalArea / rootArea;
@@ -210,17 +191,14 @@ public sealed partial class PhysicsQueryIndex
 
     private static void IncludeBin(ref Aabb bounds, ref int count, in BvhBin bin)
     {
-        if (bin.Count == 0)
-        {
+        if (bin.Count == 0) {
             return;
         }
 
-        if (count == 0)
-        {
+        if (count == 0) {
             bounds = bin.Bounds;
         }
-        else
-        {
+        else {
             bounds.Include(bin.Bounds);
         }
         count += bin.Count;
@@ -230,8 +208,7 @@ public sealed partial class PhysicsQueryIndex
         extents.x >= extents.y && extents.x >= extents.z ? 0 : extents.y >= extents.z ? 1 : 2;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static float GetAxis(float3 value, int axis) => axis switch
-    {
+    private static float GetAxis(float3 value, int axis) => axis switch {
         0 => value.x,
         1 => value.y,
         _ => value.z
@@ -244,12 +221,10 @@ public sealed partial class PhysicsQueryIndex
 
         public void Include(in Aabb bounds)
         {
-            if (Count == 0)
-            {
+            if (Count == 0) {
                 Bounds = bounds;
             }
-            else
-            {
+            else {
                 Bounds.Include(bounds);
             }
             Count++;

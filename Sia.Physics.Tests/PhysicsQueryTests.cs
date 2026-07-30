@@ -61,8 +61,7 @@ public sealed class PhysicsQueryTests
     {
         using var world = new World();
         var sphere = world.GetPhysicsShapes().Add(new SphereShape(0.4f));
-        for (var i = 0; i < 101; i++)
-        {
+        for (var i = 0; i < 101; i++) {
             world.CreateStaticBody(RigidTransform.Translate(new float3(i * 2f, i % 5, 0f)), sphere);
         }
         using var stage = SystemChain.Empty

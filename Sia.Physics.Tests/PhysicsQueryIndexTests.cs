@@ -7,8 +7,7 @@ public sealed class PhysicsQueryIndexTests
     {
         using var world = new World();
         var sphere = world.GetPhysicsShapes().Add(new SphereShape(0.5f));
-        for (var i = 0; i < 17; i++)
-        {
+        for (var i = 0; i < 17; i++) {
             world.CreateStaticBody(RigidTransform.Translate(new float3(i, 0f, 0f)), sphere);
         }
         using var stage = SystemChain.Empty
@@ -28,8 +27,7 @@ public sealed class PhysicsQueryIndexTests
     {
         using var index = new PhysicsQueryIndex();
         var bounds = new Aabb[32];
-        for (var i = 0; i < bounds.Length; i++)
-        {
+        for (var i = 0; i < bounds.Length; i++) {
             var center = new float3(i * 2f, i % 3, 0f);
             bounds[i] = Aabb.CreateFromCenterAndHalfExtents(center, new float3(0.5f));
         }
@@ -39,8 +37,7 @@ public sealed class PhysicsQueryIndexTests
         Assert.InRange(index.NodeCount, 1, bounds.Length - 1);
         Assert.Equal(bounds.Length, index.BodyCount);
         Assert.Equal(1, index.BvhRebuildCount);
-        foreach (ref readonly var bodyBounds in bounds.AsSpan())
-        {
+        foreach (ref readonly var bodyBounds in bounds.AsSpan()) {
             Assert.True(index.NodeBounds[0].Contains(bodyBounds));
         }
 
@@ -56,8 +53,7 @@ public sealed class PhysicsQueryIndexTests
     {
         using var index = new PhysicsQueryIndex();
         var bounds = new Aabb[24];
-        for (var i = 0; i < bounds.Length; i++)
-        {
+        for (var i = 0; i < bounds.Length; i++) {
             var center = new float3((i * 7) % bounds.Length, 0f, 0f);
             bounds[i] = Aabb.CreateFromCenterAndHalfExtents(center, new float3(i % 3 + 0.25f));
         }
@@ -75,8 +71,7 @@ public sealed class PhysicsQueryIndexTests
 
     private static void AssertSorted(ReadOnlySpan<int> order, ReadOnlySpan<Aabb> bounds, bool maximum)
     {
-        for (var i = 1; i < order.Length; i++)
-        {
+        for (var i = 1; i < order.Length; i++) {
             var previous = maximum ? bounds[order[i - 1]].Max.x : bounds[order[i - 1]].Min.x;
             var current = maximum ? bounds[order[i]].Max.x : bounds[order[i]].Min.x;
             Assert.True(previous <= current);

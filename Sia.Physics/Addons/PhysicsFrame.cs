@@ -61,10 +61,8 @@ public sealed class PhysicsFrame : IAddon, IDisposable
 
     internal bool TryGetBodyIndex(EntityId id, out int bodyIndex)
     {
-        for (var i = 0; i < _entities.Count; i++)
-        {
-            if (_entities[i].Id == id)
-            {
+        for (var i = 0; i < _entities.Count; i++) {
+            if (_entities[i].Id == id) {
                 bodyIndex = i;
                 return true;
             }

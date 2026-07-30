@@ -14,8 +14,7 @@ public sealed partial class PhysicsQueryIndex
 
     internal void BuildSweep(ReadOnlySpan<Aabb> bounds)
     {
-        if (bounds.IsEmpty)
-        {
+        if (bounds.IsEmpty) {
             _minimumOrder.Clear();
             _maximumOrder.Clear();
             SweepSortSwapCount = 0;
@@ -23,8 +22,7 @@ public sealed partial class PhysicsQueryIndex
         }
 
         var axis = SweepBroadphase.SelectAxis(bounds);
-        if (_minimumOrder.Count != bounds.Length || ProjectionAxis != axis)
-        {
+        if (_minimumOrder.Count != bounds.Length || ProjectionAxis != axis) {
             ProjectionAxis = axis;
             InitializeSweepOrder(_minimumOrder, bounds.Length);
             InitializeSweepOrder(_maximumOrder, bounds.Length);
@@ -50,15 +48,12 @@ public sealed partial class PhysicsQueryIndex
     {
         var low = 0;
         var high = _minimumOrder.Count;
-        while (low < high)
-        {
+        while (low < high) {
             var middle = low + ((high - low) >> 1);
-            if (GetSweepValue(bounds[_minimumOrder[middle]].Min, ProjectionAxis) <= value)
-            {
+            if (GetSweepValue(bounds[_minimumOrder[middle]].Min, ProjectionAxis) <= value) {
                 low = middle + 1;
             }
-            else
-            {
+            else {
                 high = middle;
             }
         }
@@ -69,15 +64,12 @@ public sealed partial class PhysicsQueryIndex
     {
         var low = 0;
         var high = _maximumOrder.Count;
-        while (low < high)
-        {
+        while (low < high) {
             var middle = low + ((high - low) >> 1);
-            if (GetSweepValue(bounds[_maximumOrder[middle]].Max, ProjectionAxis) < value)
-            {
+            if (GetSweepValue(bounds[_maximumOrder[middle]].Max, ProjectionAxis) < value) {
                 low = middle + 1;
             }
-            else
-            {
+            else {
                 high = middle;
             }
         }
@@ -85,8 +77,7 @@ public sealed partial class PhysicsQueryIndex
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float GetSweepValue(float3 value, SweepAxis axis) => axis switch
-    {
+    internal static float GetSweepValue(float3 value, SweepAxis axis) => axis switch {
         SweepAxis.X => value.x,
         SweepAxis.Y => value.y,
         _ => value.z
@@ -96,8 +87,7 @@ public sealed partial class PhysicsQueryIndex
     {
         order.Clear();
         order.EnsureCapacity(count);
-        for (var i = 0; i < count; i++)
-        {
+        for (var i = 0; i < count; i++) {
             order.Add(i);
         }
     }

@@ -21,35 +21,28 @@ public static class PhysicsQueries
         where TCollector : struct, IQueryCollector
     {
         var index = frame.QueryIndex;
-        if (!index.IsCurrentFor(frame.Bodies.Length) || index.NodeCount == 0)
-        {
+        if (!index.IsCurrentFor(frame.Bodies.Length) || index.NodeCount == 0) {
             RaycastLinear(frame, shapes, ray, filter, ref collector);
             return;
         }
 
         Span<BvhTraversalEntry> stack = stackalloc BvhTraversalEntry[128];
-        if (!GeometryMath.IntersectRay(index.NodeBounds[0], ray, out var rootDistance))
-        {
+        if (!GeometryMath.IntersectRay(index.NodeBounds[0], ray, out var rootDistance)) {
             return;
         }
         stack[0] = new BvhTraversalEntry(0, rootDistance);
         var stackCount = 1;
-        while (stackCount != 0)
-        {
+        while (stackCount != 0) {
             var entry = stack[--stackCount];
-            if (entry.Distance > collector.MaximumDistance)
-            {
+            if (entry.Distance > collector.MaximumDistance) {
                 continue;
             }
 
             ref readonly var node = ref index.Nodes[entry.NodeIndex];
-            if (node.IsLeaf)
-            {
-                for (var i = 0; i < node.Count; i++)
-                {
+            if (node.IsLeaf) {
+                for (var i = 0; i < node.Count; i++) {
                     var bodyIndex = index.BodyIndices[node.Index + i];
-                    if (!RaycastBody(frame, shapes, ray, filter, bodyIndex, ref collector))
-                    {
+                    if (!RaycastBody(frame, shapes, ray, filter, bodyIndex, ref collector)) {
                         return;
                     }
                 }
@@ -62,25 +55,20 @@ public static class PhysicsQueries
                 leftDistance <= collector.MaximumDistance;
             var hitRight = GeometryMath.IntersectRay(index.NodeBounds[rightChild], ray, out var rightDistance) &&
                 rightDistance <= collector.MaximumDistance;
-            if (hitLeft && hitRight)
-            {
-                if (leftDistance <= rightDistance)
-                {
+            if (hitLeft && hitRight) {
+                if (leftDistance <= rightDistance) {
                     stack[stackCount++] = new BvhTraversalEntry(rightChild, rightDistance);
                     stack[stackCount++] = new BvhTraversalEntry(leftChild, leftDistance);
                 }
-                else
-                {
+                else {
                     stack[stackCount++] = new BvhTraversalEntry(leftChild, leftDistance);
                     stack[stackCount++] = new BvhTraversalEntry(rightChild, rightDistance);
                 }
             }
-            else if (hitLeft)
-            {
+            else if (hitLeft) {
                 stack[stackCount++] = new BvhTraversalEntry(leftChild, leftDistance);
             }
-            else if (hitRight)
-            {
+            else if (hitRight) {
                 stack[stackCount++] = new BvhTraversalEntry(rightChild, rightDistance);
             }
         }
@@ -96,16 +84,13 @@ public static class PhysicsQueries
     {
         var bodies = frame.Bodies;
         var bounds = frame.Bounds;
-        for (var i = 0; i < bodies.Length; i++)
-        {
+        for (var i = 0; i < bodies.Length; i++) {
             if (!GeometryMath.IntersectRay(bounds[i], ray, out var broadphaseDistance) ||
-                broadphaseDistance > collector.MaximumDistance)
-            {
+                broadphaseDistance > collector.MaximumDistance) {
                 continue;
             }
 
-            if (!RaycastBody(frame, shapes, ray, filter, i, ref collector))
-            {
+            if (!RaycastBody(frame, shapes, ray, filter, i, ref collector)) {
                 return;
             }
         }
@@ -123,8 +108,7 @@ public static class PhysicsQueries
         ref var body = ref frame.Bodies[bodyIndex];
         if (!filter.Allows(body.Collider) ||
             !shapes.Raycast(body.Body.Shape, body.Pose, ray, out var distance, out var normal) ||
-            distance > collector.MaximumDistance)
-        {
+            distance > collector.MaximumDistance) {
             return true;
         }
 
@@ -150,8 +134,7 @@ public static class PhysicsQueries
     {
         var index = frame.QueryIndex;
         var bodyBounds = frame.Bounds;
-        if (!index.IsCurrentFor(bodyBounds.Length) || bodyBounds.IsEmpty)
-        {
+        if (!index.IsCurrentFor(bodyBounds.Length) || bodyBounds.IsEmpty) {
             OverlapAabbLinear(frame, bounds, filter, ref collector);
             return;
         }
@@ -164,11 +147,9 @@ public static class PhysicsQueries
         var order = minimumCount <= maximumCount ? index.MinimumOrder : index.MaximumOrder;
         var start = minimumCount <= maximumCount ? 0 : maximumStart;
         var count = System.Math.Min(minimumCount, maximumCount);
-        for (var i = 0; i < count; i++)
-        {
+        for (var i = 0; i < count; i++) {
             var bodyIndex = order[start + i];
-            if (!OverlapBody(frame, bounds, filter, bodyIndex, ref collector))
-            {
+            if (!OverlapBody(frame, bounds, filter, bodyIndex, ref collector)) {
                 return;
             }
         }
@@ -182,15 +163,12 @@ public static class PhysicsQueries
         where TCollector : struct, IOverlapCollector
     {
         var bodyBounds = frame.Bounds;
-        for (var i = 0; i < bodyBounds.Length; i++)
-        {
-            if (!bounds.Overlaps(bodyBounds[i]))
-            {
+        for (var i = 0; i < bodyBounds.Length; i++) {
+            if (!bounds.Overlaps(bodyBounds[i])) {
                 continue;
             }
 
-            if (!OverlapBody(frame, bounds, filter, i, ref collector))
-            {
+            if (!OverlapBody(frame, bounds, filter, i, ref collector)) {
                 return;
             }
         }
@@ -204,8 +182,7 @@ public static class PhysicsQueries
         ref TCollector collector)
         where TCollector : struct, IOverlapCollector
     {
-        if (!filter.Allows(frame.Bodies[bodyIndex].Collider) || !bounds.Overlaps(frame.Bounds[bodyIndex]))
-        {
+        if (!filter.Allows(frame.Bodies[bodyIndex].Collider) || !bounds.Overlaps(frame.Bounds[bodyIndex])) {
             return true;
         }
 

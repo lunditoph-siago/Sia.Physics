@@ -8,13 +8,11 @@ internal static class SweepBodySort
         SweepAxis axis,
         bool maximum)
     {
-        for (var start = order.Length / 2 - 1; start >= 0; start--)
-        {
+        for (var start = order.Length / 2 - 1; start >= 0; start--) {
             SiftDown(order, bounds, axis, maximum, start, order.Length);
         }
 
-        for (var end = order.Length - 1; end > 0; end--)
-        {
+        for (var end = order.Length - 1; end > 0; end--) {
             (order[0], order[end]) = (order[end], order[0]);
             SiftDown(order, bounds, axis, maximum, 0, end);
         }
@@ -27,12 +25,10 @@ internal static class SweepBodySort
         bool maximum)
     {
         var swapCount = 0;
-        for (var i = 1; i < order.Length; i++)
-        {
+        for (var i = 1; i < order.Length; i++) {
             var bodyIndex = order[i];
             var destination = i;
-            while (destination > 0 && Compare(bodyIndex, order[destination - 1], bounds, axis, maximum) < 0)
-            {
+            while (destination > 0 && Compare(bodyIndex, order[destination - 1], bounds, axis, maximum) < 0) {
                 order[destination] = order[destination - 1];
                 destination--;
                 swapCount++;
@@ -50,20 +46,16 @@ internal static class SweepBodySort
         int root,
         int count)
     {
-        while (true)
-        {
+        while (true) {
             var child = root * 2 + 1;
-            if (child >= count)
-            {
+            if (child >= count) {
                 return;
             }
 
-            if (child + 1 < count && Compare(order[child], order[child + 1], bounds, axis, maximum) < 0)
-            {
+            if (child + 1 < count && Compare(order[child], order[child + 1], bounds, axis, maximum) < 0) {
                 child++;
             }
-            if (Compare(order[root], order[child], bounds, axis, maximum) >= 0)
-            {
+            if (Compare(order[root], order[child], bounds, axis, maximum) >= 0) {
                 return;
             }
 

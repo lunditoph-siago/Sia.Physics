@@ -4,8 +4,8 @@ namespace Sia.Physics.Benchmarks;
 
 public static class Program
 {
-    private const int WarmupSteps = 16;
-    private const int MeasuredSteps = 120;
+    private const int k_WarmupSteps = 16;
+    private const int k_MeasuredSteps = 120;
 
     public static void Main()
     {
@@ -18,25 +18,21 @@ public static class Program
     {
         var (world, stage) = create();
         using (world)
-        using (stage)
-        {
-            for (var i = 0; i < WarmupSteps; i++)
-            {
+        using (stage) {
+            for (var i = 0; i < k_WarmupSteps; i++) {
                 stage.Tick();
             }
 
             var allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
             var stopwatch = Stopwatch.StartNew();
-            for (var i = 0; i < MeasuredSteps; i++)
-            {
+            for (var i = 0; i < k_MeasuredSteps; i++) {
                 stage.Tick();
             }
             stopwatch.Stop();
             var allocated = GC.GetAllocatedBytesForCurrentThread() - allocatedBefore;
-            Console.WriteLine($"{name,-20} {stopwatch.Elapsed.TotalMilliseconds / MeasuredSteps,8:F3} ms/step " +
-                $"{allocated / (double)MeasuredSteps,8:F1} B/step");
-            if (world.TryGetAddon<PhysicsFrame>(out var frame))
-            {
+            Console.WriteLine($"{name,-20} {stopwatch.Elapsed.TotalMilliseconds / k_MeasuredSteps,8:F3} ms/step " +
+                $"{allocated / (double)k_MeasuredSteps,8:F1} B/step");
+            if (world.TryGetAddon<PhysicsFrame>(out var frame)) {
                 Console.WriteLine($"{string.Empty,-20} {frame.QueryIndex.BvhRebuildCount,8} BVH rebuilds");
             }
         }
@@ -47,8 +43,7 @@ public static class Program
         using var world = new World();
         var shapes = world.GetPhysicsShapes();
         var sphere = shapes.Add(new SphereShape(0.45f));
-        for (var i = 0; i < 4096; i++)
-        {
+        for (var i = 0; i < 4096; i++) {
             var x = i % 64;
             var y = i / 64;
             world.CreateStaticBody(RigidTransform.Translate(new float3(x, y, 0f) * 2f), sphere);
@@ -78,15 +73,13 @@ public static class Program
         int queryCount,
         ref int checksum)
     {
-        for (var i = 0; i < 256; i++)
-        {
+        for (var i = 0; i < 256; i++) {
             Raycast(frame, shapes, i, ref checksum);
         }
 
         var allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
         var stopwatch = Stopwatch.StartNew();
-        for (var i = 0; i < queryCount; i++)
-        {
+        for (var i = 0; i < queryCount; i++) {
             Raycast(frame, shapes, i, ref checksum);
         }
         stopwatch.Stop();
@@ -98,15 +91,13 @@ public static class Program
     private static void MeasureOverlaps(string name, PhysicsFrame frame, int queryCount, ref int checksum)
     {
         var overlapBounds = Aabb.CreateFromCenterAndHalfExtents(new float3(124f, 124f, 0f), new float3(2f));
-        for (var i = 0; i < 256; i++)
-        {
+        for (var i = 0; i < 256; i++) {
             Overlap(frame, overlapBounds, ref checksum);
         }
 
         var allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
         var stopwatch = Stopwatch.StartNew();
-        for (var i = 0; i < queryCount; i++)
-        {
+        for (var i = 0; i < queryCount; i++) {
             Overlap(frame, overlapBounds, ref checksum);
         }
         stopwatch.Stop();
@@ -136,8 +127,7 @@ public static class Program
         var world = new World();
         world.GetPhysicsConfiguration().Gravity = float3.zero;
         var sphere = world.GetPhysicsShapes().Add(new SphereShape(0.45f));
-        for (var i = 0; i < 2048; i++)
-        {
+        for (var i = 0; i < 2048; i++) {
             var x = i % 32;
             var y = (i / 32) % 16;
             var z = i / 512;
@@ -154,8 +144,7 @@ public static class Program
     {
         var world = new World();
         world.GetPhysicsConfiguration().Gravity = float3.zero;
-        for (var i = 0; i < 4096; i++)
-        {
+        for (var i = 0; i < 4096; i++) {
             var x = i % 64;
             var y = i / 64;
             world.CreateParticle(new float3(x, y, 0f) * 0.22f, 1f, 0.1f);

@@ -6,6 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Optimize>true</Optimize>
+    <IsPackable>true</IsPackable>
+    <PackageId>Sia.Physics</PackageId>
+    <PackageDescription>Data-oriented physics layer for Sia ECS and Sia.Math</PackageDescription>
+    <RepositoryUrl>https://github.com/lunditoph-siago/Sia.Physics</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,90 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    env:
+      BUILD_CONFIG: Release
+      SOLUTION: Sia.Physics/Sia.Physics.slnx
+      PACKAGE_PROJECT: Sia.Physics/Sia.Physics/Sia.Physics.csproj
+      PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}/output
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Sia.Physics
+        uses: actions/checkout@v7
+        with:
+          path: Sia.Physics
+          persist-credentials: false
+
+      - name: Checkout Sia.NET dependency
+        uses: actions/checkout@v7
+        with:
+          repository: lunditoph-siago/Sia.NET
+          ref: master
+          path: Sia.NET
+          persist-credentials: false
+
+      - name: Checkout Sia.Math dependency
+        uses: actions/checkout@v7
+        with:
+          repository: lunditoph-siago/Sia.Math
+          ref: master
+          path: Sia.Math
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+
+      - name: Resolve release version
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Publishing requires a version tag such as v0.1.0-preview.1." >&2
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Restore dependencies
+        run: dotnet restore "$SOLUTION"
+
+      - name: Build project
+        run: dotnet build "$SOLUTION" --configuration "$BUILD_CONFIG" -p:Version="$VERSION" --no-restore
+
+      - name: Run tests
+        run: dotnet test Sia.Physics/Sia.Physics.Tests/Sia.Physics.Tests.csproj --configuration "$BUILD_CONFIG" --no-restore --no-build --verbosity normal
+
+      - name: Pack project
+        run: dotnet pack "$PACKAGE_PROJECT" --configuration "$BUILD_CONFIG" -p:PackageVersion="$VERSION" --no-restore --no-build --output "$PACKAGE_OUTPUT_DIRECTORY"
+
+      - name: Publish packages
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget push "$PACKAGE_OUTPUT_DIRECTORY"/*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source 'https://api.nuget.org/v3/index.json' \
+            --skip-duplicate
+          dotnet nuget add source \
+            "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --name github \
+            --username "${{ github.repository_owner }}" \
+            --password "$GITHUB_TOKEN" \
+            --store-password-in-clear-text
+          dotnet nuget push "$PACKAGE_OUTPUT_DIRECTORY"/*.nupkg \
+            --api-key "$GITHUB_TOKEN" \
+            --source github \
+            --skip-duplicate

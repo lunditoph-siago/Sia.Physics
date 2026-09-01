@@ -15,8 +15,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sia.Physics\Sia.Physics.csproj" />
-    <ProjectReference Include="..\..\Sia.Graphics\Sia.WebGPU\Sia.WebGPU.csproj" />
-    <ProjectReference Include="..\..\Sia.Graphics\Sia.WebGPU.Native\Sia.WebGPU.Native.csproj" />
+    <PackageReference Include="Sia.WebGPU" Version="0.0.15" />
+    <PackageReference Include="Sia.WebGPU.Native" Version="0.0.15" />
     <ProjectReference Include="..\..\Sia.Window\Sia.GLFW\Sia.GLFW.csproj" />
     <ProjectReference Include="..\..\Sia.Window\Sia.GLFW.Native\Sia.GLFW.Native.csproj" />
   </ItemGroup>

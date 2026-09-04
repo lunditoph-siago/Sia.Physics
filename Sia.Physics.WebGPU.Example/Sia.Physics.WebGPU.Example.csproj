@@ -11,10 +11,12 @@
 
   <ItemGroup>
     <Using Include="Sia.Math" />
+    <Using Include="Sia.Engine.Rendering.Debug" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sia.Physics\Sia.Physics.csproj" />
+    <PackageReference Include="Sia.Rendering.Debug" Version="0.0.4" />
     <PackageReference Include="Sia.WebGPU" Version="0.0.15" />
     <PackageReference Include="Sia.WebGPU.Native" Version="0.0.15" />
     <ProjectReference Include="..\..\Sia.Window\Sia.GLFW\Sia.GLFW.csproj" />

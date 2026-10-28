@@ -7,9 +7,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
-  id-token: write
-  attestations: write
 
 concurrency:
   group: publish-${{ github.repository }}-${{ github.ref }}
@@ -17,85 +14,124 @@ concurrency:
 
 jobs:
   build:
-    environment: nuget.org
-    env:
-      BUILD_CONFIG: Release
-      SOLUTION: Sia.Physics/Sia.Physics.slnx
-      PACKAGE_PROJECT: Sia.Physics/Sia.Physics/Sia.Physics.csproj
-      PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}/output
-
     runs-on: ubuntu-latest
 
+    env:
+      BUILD_CONFIG: Release
+      SOLUTION: Sia.Physics.slnx
+      PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}/output
+
     steps:
-      - name: Checkout Sia.Physics
+      - name: Checkout
         uses: actions/checkout@v7
-        with:
-          path: Sia.Physics
-          persist-credentials: false
-
-      - name: Checkout Sia.NET dependency
-        uses: actions/checkout@v7
-        with:
-          repository: lunditoph-siago/Sia.NET
-          ref: master
-          path: Sia.NET
-          persist-credentials: false
-
-      - name: Checkout Sia.Math dependency
-        uses: actions/checkout@v7
-        with:
-          repository: lunditoph-siago/Sia.Math
-          ref: master
-          path: Sia.Math
-          persist-credentials: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 11.0.100-preview.7.26381.103
+          dotnet-version: 11.x
 
-      - name: Resolve release version
-        shell: bash
+      - name: Get version from tag
+        env:
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
-            echo "Publishing requires a version tag such as v0.1.0-preview.1." >&2
+          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version tag: $TAG_NAME"
             exit 1
           fi
-          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+          echo "VERSION=${TAG_NAME#v}" >> "$GITHUB_ENV"
 
       - name: Restore dependencies
         run: dotnet restore "$SOLUTION"
 
       - name: Build project
-        run: dotnet build "$SOLUTION" --configuration "$BUILD_CONFIG" -p:Version="$VERSION" --no-restore
+        run: |
+          dotnet build "$SOLUTION" \
+            --configuration "$BUILD_CONFIG" \
+            -p:Version="$VERSION" \
+            --no-restore
 
       - name: Run tests
-        run: dotnet test Sia.Physics/Sia.Physics.Tests/Sia.Physics.Tests.csproj --configuration "$BUILD_CONFIG" --no-restore --no-build --verbosity normal
+        run: |
+          dotnet test "$SOLUTION" \
+            --configuration "$BUILD_CONFIG" \
+            --no-restore \
+            --no-build \
+            --blame-hang \
+            --blame-hang-timeout 5m \
+            --verbosity normal
 
-      - name: Pack project
-        run: dotnet pack "$PACKAGE_PROJECT" --configuration "$BUILD_CONFIG" -p:PackageVersion="$VERSION" --no-restore --no-build --output "$PACKAGE_OUTPUT_DIRECTORY"
+      - name: Pack projects
+        run: |
+          dotnet pack "$SOLUTION" \
+            --configuration "$BUILD_CONFIG" \
+            -p:PackageVersion="$VERSION" \
+            --no-restore \
+            --no-build \
+            --output "$PACKAGE_OUTPUT_DIRECTORY"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ${{ github.workspace }}/output/*.nupkg
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: nuget.org
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+
+    env:
+      PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}/output
+
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 11.x
+
+      - name: Download packages
+        uses: actions/download-artifact@v5
+        with:
+          name: nuget-packages
+          path: ${{ github.workspace }}/output
 
       - name: Attest packages
         uses: actions/attest@v4
         with:
           subject-path: '${{ github.workspace }}/output/*.nupkg'
 
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Publish packages
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           dotnet nuget push "$PACKAGE_OUTPUT_DIRECTORY"/*.nupkg \
             --api-key "$NUGET_API_KEY" \
-            --source 'https://api.nuget.org/v3/index.json' \
+            --source "https://api.nuget.org/v3/index.json" \
             --skip-duplicate
+
           dotnet nuget add source \
             "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
             --name github \
             --username "${{ github.repository_owner }}" \
             --password "$GITHUB_TOKEN" \
             --store-password-in-clear-text
+
           dotnet nuget push "$PACKAGE_OUTPUT_DIRECTORY"/*.nupkg \
             --api-key "$GITHUB_TOKEN" \
             --source github \

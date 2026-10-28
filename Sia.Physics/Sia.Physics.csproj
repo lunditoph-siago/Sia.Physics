@@ -5,15 +5,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Optimize>true</Optimize>
+    <IsPackable>true</IsPackable>
+    <PackageId>Sia.Physics</PackageId>
+    <PackageDescription>Data-oriented physics layer for Sia ECS and Sia.Math</PackageDescription>
+    <RepositoryUrl>https://github.com/lunditoph-siago/Sia.Physics</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Sia.NET\Sia\Sia.csproj" />
-    <ProjectReference Include="..\..\Sia.NET\Sia.CodeGenerators\Sia.CodeGenerators.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\Sia.Math\Sia.Math\Sia.Math.csproj" />
+    <PackageReference Include="Sia" Version="2.1.5" />
+    <PackageReference Include="Sia.CodeGenerators" Version="2.1.5" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Sia.Math" Version="0.0.4" />
   </ItemGroup>
 
   <ItemGroup>

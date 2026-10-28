@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net11.0</TargetFramework>
-    <LangVersion>14</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,10 +15,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sia.Physics\Sia.Physics.csproj" />
-    <PackageReference Include="Sia.Rendering.Debug" Version="0.0.4" />
-    <PackageReference Include="Sia.WebGPU" Version="0.0.15" />
-    <PackageReference Include="Sia.WebGPU.Native" Version="0.0.15" />
-    <ProjectReference Include="..\..\Sia.Window\Sia.GLFW\Sia.GLFW.csproj" />
-    <ProjectReference Include="..\..\Sia.Window\Sia.GLFW.Native\Sia.GLFW.Native.csproj" />
+    <PackageReference Include="Sia.WebGPU" Version="0.0.24" />
+    <PackageReference Include="Sia.WebGPU.Native" Version="0.0.24" />
+    <PackageReference Include="Sia.GLFW" Version="0.0.8"/>
+    <PackageReference Include="Sia.GLFW.Native" Version="0.0.8" />
   </ItemGroup>
 </Project>

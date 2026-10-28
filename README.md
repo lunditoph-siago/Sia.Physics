@@ -1,6 +1,8 @@
 # Sia.Physics
 
-Sia.Physics is a data-oriented physics layer for Sia ECS and Sia.Math. It targets .NET 11 and keeps persistent simulation state in ECS components while transient collision and constraint data is packed into aligned native frames.
+Sia.Physics is a data-oriented physics layer for Sia ECS and Sia.Math. It keeps
+persistent simulation state in ECS components while transient collision and
+constraint data is packed into aligned native frames.
 
 ## Capabilities
 
@@ -26,14 +28,6 @@ stage.Tick();
 var pose = body.Get<RigidTransform>();
 ```
 
-Use `CreateContinuousBody` for fast spheres, `CreateDistanceJoint` for rigid constraints, and `ParticlePipeline.Default` for XPBD particles. Scene queries read the most recently built `PhysicsFrame` and return the originating Sia `Entity`.
-
-## Validation
-
-From this directory, using the workspace-local .NET 11 SDK:
-
-```powershell
-& '..\.dotnet\dotnet.exe' build Sia.Physics.slnx -c Release
-& '..\.dotnet\dotnet.exe' test Sia.Physics.Tests/Sia.Physics.Tests.csproj -c Release
-& '..\.dotnet\dotnet.exe' run --project Sia.Physics.Benchmarks -c Release
-```
+Use `CreateContinuousBody` for fast spheres, `CreateDistanceJoint` for rigid
+constraints, and `ParticlePipeline.Default` for XPBD particles. Scene queries
+read the most recently built `PhysicsFrame` and return the originating Sia `Entity`.

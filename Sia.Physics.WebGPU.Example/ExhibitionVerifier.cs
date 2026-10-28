@@ -23,7 +23,7 @@ internal static class ExhibitionVerifier
                 scene.ValidateState();
             }
 
-            var builder = new DebugMeshBuilder();
+            var builder = new DebugDrawList();
             scene.BuildDebugMesh(builder);
             ValidateMesh(builder);
             output.WriteLine(
@@ -38,7 +38,7 @@ internal static class ExhibitionVerifier
         }
     }
 
-    private static void ValidateMesh(DebugMeshBuilder builder)
+    private static void ValidateMesh(DebugDrawList builder)
     {
         if (builder.VertexCount == 0 || builder.VertexCount % 3 != 0) {
             throw new InvalidOperationException("The exhibition produced no valid triangle-list geometry.");

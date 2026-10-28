@@ -2,7 +2,7 @@ namespace Sia.Physics.WebGPU.Example;
 
 internal sealed partial class ExhibitionScene
 {
-    public void BuildDebugMesh(DebugMeshBuilder builder)
+    public void BuildDebugMesh(DebugDrawList builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
         foreach (var renderBody in _renderBodies.Values) {
@@ -42,7 +42,7 @@ internal sealed partial class ExhibitionScene
         }
     }
 
-    private static void AddRegionGuides(DebugMeshBuilder builder)
+    private static void AddRegionGuides(DebugDrawList builder)
     {
         foreach (var region in Enum.GetValues<ExhibitionRegion>()) {
             var center = GetCenter(region);
@@ -56,7 +56,7 @@ internal sealed partial class ExhibitionScene
         }
     }
 
-    private void AddQuerySweep(DebugMeshBuilder builder)
+    private void AddQuerySweep(DebugDrawList builder)
     {
         var center = GetCenter(ExhibitionRegion.Queries);
         var phase = _elapsedTime * 0.65f;

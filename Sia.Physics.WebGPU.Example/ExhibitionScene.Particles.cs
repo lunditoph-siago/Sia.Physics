@@ -82,13 +82,13 @@ internal sealed partial class ExhibitionScene
         ExhibitionRegion region,
         global::Sia.Entity entity,
         float radius,
-        System.Numerics.Vector4 color)
+        float4 color)
     {
         TrackEntity(region, entity);
         _renderParticles.Add(entity.Id, new(entity, region, radius, color));
     }
 
-    private void AddParticleGeometry(DebugMeshBuilder builder)
+    private void AddParticleGeometry(DebugDrawList builder)
     {
         foreach (var particle in _renderParticles.Values) {
             var position = particle.Entity.Get<ParticlePosition>().Value;

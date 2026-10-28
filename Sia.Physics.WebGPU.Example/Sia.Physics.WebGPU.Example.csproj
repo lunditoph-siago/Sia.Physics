@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Using Include="Sia.Math" />
+    <Using Include="Sia.Engine.Rendering.Debug" />
   </ItemGroup>
 
   <ItemGroup>

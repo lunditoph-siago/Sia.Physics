@@ -17,7 +17,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
 
     private readonly HashSet<Key> _pressedKeys = [];
     private readonly HashSet<MouseButton> _pressedMouseButtons = [];
-    private readonly DebugMeshBuilder _meshBuilder = new();
+    private readonly DebugDrawList _meshBuilder = new();
     private readonly int? _maximumFrameCount;
     private readonly bool _windowVisible;
 
@@ -321,25 +321,25 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
             attributes[0] = new() {
                 NextInChain = null,
                 Format = WGPUVertexFormat.Float32x3,
-                Offset = 0,
+                Offset = DebugVertex.PositionOffset,
                 ShaderLocation = 0,
             };
             attributes[1] = new() {
                 NextInChain = null,
                 Format = WGPUVertexFormat.Float32x3,
-                Offset = 12,
+                Offset = DebugVertex.NormalOffset,
                 ShaderLocation = 1,
             };
             attributes[2] = new() {
                 NextInChain = null,
                 Format = WGPUVertexFormat.Float32x4,
-                Offset = 24,
+                Offset = DebugVertex.ColorOffset,
                 ShaderLocation = 2,
             };
             var vertexBufferLayout = new WGPUVertexBufferLayout {
                 NextInChain = null,
                 StepMode = WGPUVertexStepMode.Vertex,
-                ArrayStride = DebugMeshBuilder.VertexStride,
+                ArrayStride = DebugVertex.Stride,
                 AttributeCount = 3,
                 Attributes = attributes,
             };
@@ -483,7 +483,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
 
     private void UploadGeometry()
     {
-        var requiredBytes = checked((ulong)_meshBuilder.VertexCount * DebugMeshBuilder.VertexStride);
+        var requiredBytes = checked((ulong)_meshBuilder.VertexCount * DebugVertex.Stride);
         EnsureVertexBuffer(requiredBytes);
         if (requiredBytes != 0) {
             Wgpu.WriteBuffer(_queue, _vertexBuffer, 0, _meshBuilder.Vertices);
@@ -655,7 +655,7 @@ internal sealed unsafe class PhysicsDemoApp : IDisposable
                         pass,
                         0,
                         _vertexBuffer,
-                        size: checked((ulong)_meshBuilder.VertexCount * DebugMeshBuilder.VertexStride));
+                        size: checked((ulong)_meshBuilder.VertexCount * DebugVertex.Stride));
                     Wgpu.Draw(pass, (uint)_meshBuilder.VertexCount);
                 }
                 Wgpu.EndRenderPass(pass);

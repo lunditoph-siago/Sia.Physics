@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Sia.Physics.WebGPU.Example;
 
 internal sealed partial class ExhibitionScene : IDisposable
@@ -144,7 +142,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         _ => throw new ArgumentOutOfRangeException(nameof(region)),
     };
 
-    public static Vector4 GetColor(ExhibitionRegion region) => region switch {
+    public static float4 GetColor(ExhibitionRegion region) => region switch {
         ExhibitionRegion.Stack => DebugPalette.Stack,
         ExhibitionRegion.Shapes => DebugPalette.Shapes,
         ExhibitionRegion.Continuous => DebugPalette.Continuous,
@@ -187,7 +185,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         ExhibitionRegion region,
         DemoShape shape,
         in RigidTransform pose,
-        Vector4 color)
+        float4 color)
     {
         var entity = World.CreateStaticBody(pose, GetShapeHandle(shape));
         TrackBody(region, entity, shape, color);
@@ -198,7 +196,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         ExhibitionRegion region,
         DemoShape shape,
         in RigidTransform pose,
-        Vector4 color,
+        float4 color,
         PhysicsVelocity velocity = default,
         bool continuous = false,
         float density = 1f)
@@ -216,7 +214,7 @@ internal sealed partial class ExhibitionScene : IDisposable
         ExhibitionRegion region,
         global::Sia.Entity entity,
         DemoShape shape,
-        Vector4 color)
+        float4 color)
     {
         _regionEntities[region].Add(entity);
         _renderBodies.Add(entity.Id, new(entity, shape, region, color));
